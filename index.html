@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiddle (Reprise) · DMB 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAFA;
+    --ink: #0A0A0A;
+    --rule: #E0E0E0;
+    --rule-strong: #C8C8C8;
+    --muted: #8A8A8A;
+    --muted-2: #B5B5B5;
+    --high: #1E7A3E;
+    --high-bg: #E9F2EC;
+    --low: #C44438;
+    --low-bg: #F7E8E7;
+    --lukas: #555;
+    --driessen: #999;
+  }
+
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-feature-settings: 'tnum' 1, 'cv11' 1;
+    line-height: 1.45;
+    font-size: 16px;
+  }
+
+  .container {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 72px 40px 160px;
+  }
+
+  /* ============ Masthead ============ */
+  .title {
+    font-size: 88px;
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
+    margin-bottom: 36px;
+  }
+  .title-paren {
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .lede {
+    font-size: 17px;
+    line-height: 1.55;
+    max-width: 600px;
+    margin-bottom: 48px;
+  }
+  .meta {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--ink);
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .meta b {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ============ Section headers ============ */
+  .section { padding-top: 80px; }
+  .section-num {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+  .section-title {
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    margin-top: 8px;
+    margin-bottom: 24px;
+  }
+  .section-caption {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.55;
+    max-width: 640px;
+    margin-bottom: 32px;
+  }
+
+  /* ============ Calibration callout ============ */
+  .callout {
+    border: 1px solid var(--ink);
+    padding: 24px 28px;
+    margin-bottom: 40px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+  .callout-stats {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 36px;
+  }
+  .callout-num {
+    font-size: 56px;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    display: block;
+  }
+  .callout-num .unit { font-size: 18px; color: var(--muted); letter-spacing: 0; }
+  .callout-stats .callout-num.actual { color: var(--high); }
+  .callout-body {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .callout-body b { font-weight: 500; }
+  .callout-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  /* ============ How the score works ============ */
+  .inputs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+  .input {
+    padding: 24px 24px 28px 0;
+    border-right: 1px solid var(--rule);
+  }
+  .input:last-child { border-right: none; padding-right: 0; }
+  .input-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .input-weight {
+    font-size: 36px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+  .input-weight .unit {
+    font-size: 16px;
+    color: var(--muted);
+    letter-spacing: 0;
+  }
+  .input-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink);
+    padding-right: 12px;
+  }
+
+  /* ============ Master timeline ============ */
+  .timeline-master {
+    width: 100%;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 28px 0 12px;
+  }
+  .timeline-master-legend {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  .legend-key { display: flex; align-items: center; gap: 8px; }
+  .legend-mark {
+    width: 2px;
+    height: 12px;
+    background: var(--ink);
+  }
+  .legend-mark.high { background: var(--high); }
+  .legend-mark.low { background: var(--low); }
+  .legend-mark.lukas { background: var(--lukas); }
+  .legend-mark.driessen { background: var(--driessen); }
+  .legend-mark.today { width: 1px; height: 12px; background: var(--muted); }
+
+  /* ============ Tabs ============ */
+  .tabs {
+    display: flex;
+    gap: 32px;
+    margin-top: 16px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .tab {
+    background: none;
+    border: none;
+    padding: 14px 0;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 150ms;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+  .tab .count {
+    font-weight: 400;
+    color: var(--muted-2);
+    margin-left: 6px;
+  }
+  .tab.active .count { color: var(--muted); }
+
+  /* ============ Show rows ============ */
+  .shows-list { margin-top: 8px; }
+
+  .show {
+    display: grid;
+    grid-template-columns: 88px 1fr 280px 124px;
+    gap: 32px;
+    padding: 26px 0;
+    border-top: 1px solid var(--rule);
+    align-items: start;
+  }
+  .show:last-child { border-bottom: 1px solid var(--ink); }
+
+  .show[data-tier="high"] .prob { color: var(--high); }
+  .show[data-tier="low"] .prob { color: var(--low); }
+  .show[data-tier="high"] .prob-bar { background: var(--high); }
+  .show[data-tier="low"] .prob-bar { background: var(--low); }
+
+  .show[data-status="past"] { opacity: 0.55; }
+  .show[data-status="past"][data-outcome="sitin"] { opacity: 1; }
+
+  /* Date */
+  .date { font-feature-settings: 'tnum' 1; }
+  .date-num {
+    font-size: 36px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .date-mo {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+  }
+
+  /* Venue */
+  .venue { padding-top: 2px; }
+  .venue-name {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+  }
+  .venue-city {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .why {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    line-height: 1.55;
+  }
+
+  /* Mini timeline column */
+  .mini-col { padding-top: 6px; }
+  .mini-timeline { width: 100%; }
+  .mini-inputs {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 16px;
+  }
+  .mini-inputs .row { display: contents; }
+  .mini-inputs .k {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .mini-inputs .v {
+    color: var(--ink);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Metric */
+  .metric { text-align: right; }
+  .prob-line {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: opacity 150ms;
+  }
+  .prob-line:hover { opacity: 0.6; }
+  .prob {
+    font-size: 36px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.035em;
+    line-height: 1;
+  }
+  .arrow { font-size: 16px; line-height: 1; }
+  .prob-bar-track {
+    height: 2px;
+    background: var(--rule);
+    width: 100%;
+    margin: 12px 0 0 auto;
+    position: relative;
+  }
+  .prob-bar {
+    height: 2px;
+    background: var(--ink);
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  .outcome {
+    margin-top: 12px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+  .outcome.sitin { color: var(--high); }
+  .outcome.no-sitin { color: var(--muted); }
+
+  /* ============ Footer ============ */
+  .footer {
+    margin-top: 96px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+    max-width: 640px;
+  }
+  .footer p + p { margin-top: 14px; }
+
+  /* ============ Mobile ============ */
+  @media (max-width: 880px) {
+    .container { padding: 48px 24px 100px; }
+    .title { font-size: 44px; letter-spacing: -0.04em; margin-bottom: 24px; }
+    .lede { font-size: 15px; margin-bottom: 36px; }
+
+    .callout { grid-template-columns: 1fr; gap: 12px; padding: 20px 22px; }
+    .callout-num { font-size: 40px; }
+
+    .inputs { grid-template-columns: 1fr 1fr; }
+    .input { border-right: none; border-bottom: 1px solid var(--rule); padding: 18px 16px 22px 0; }
+    .input:nth-child(2n) { padding-right: 0; }
+    .input-weight { font-size: 28px; }
+
+    .show {
+      grid-template-columns: 60px 1fr 80px;
+      grid-template-rows: auto auto;
+      gap: 16px 16px;
+      padding: 20px 0;
+    }
+    .date-num { font-size: 26px; }
+    .venue-name { font-size: 14px; }
+    .venue-city { font-size: 12px; }
+    .prob { font-size: 26px; }
+    .mini-col { grid-column: 1 / -1; padding-top: 4px; }
+    .mini-inputs { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <h1 class="title">Fiddle <span class="title-paren">(Reprise)</span></h1>
+    <p class="lede">
+      A probability index for fiddle sit-ins on the Dave Matthews Band 2026 tour. Higher scores mean Jake Simpson, Casey Driessen, or another guest fiddler is more likely to join.
+    </p>
+    <div class="meta">
+      <span><b>UPDATED</b>&nbsp; 14 June 2026</span>
+      <span><b>37</b>&nbsp; SHOWS</span>
+      <span><b>14</b>&nbsp; PLAYED</span>
+      <span><b>6</b>&nbsp; SIT-INS CONFIRMED</span>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="section-num">01 · MODEL</div>
+    <h2 class="section-title">How the score works</h2>
+
+    <div class="callout">
+      <div class="callout-stats">
+        <div>
+          <span class="callout-label">Predicted (v2)</span>
+          <span class="callout-num">5.8<span class="unit">&thinsp;sit-ins</span></span>
+        </div>
+        <div>
+          <span class="callout-label">Actual</span>
+          <span class="callout-num actual">6<span class="unit">&thinsp;sit-ins</span></span>
+        </div>
+      </div>
+      <div class="callout-body">
+        Across the 14 played shows of the 2026 tour, the recalibrated <b>v2</b> model would have expected 5.8 fiddle sit-ins. Six occurred. <b>v1</b> expected just 3.1 — meaningfully under-predicted. Past forecasts on the rows below stay frozen at their original v1 numbers so the recalibration is visible.
+      </div>
+    </div>
+
+    <p class="section-caption">
+      Each show starts at an 18% baseline. Recalibrated 14 June from 14 played shows where the medium tier was forecast at ~22% but hit at 50%. Three inputs adjust the score.
+    </p>
+    <div class="inputs">
+      <div class="input">
+        <div class="input-label">Input · 01</div>
+        <div class="input-weight">+50<span class="unit"></span></div>
+        <div class="input-desc">
+          <b>Shared festival bill.</b> DMB and Lukas Nelson on the same lineup. Strongest predictor: Wildlands and Farm Aid 40 in 2025 were both shared-bill sit-ins.
+        </div>
+      </div>
+      <div class="input">
+        <div class="input-label">Input · 02</div>
+        <div class="input-weight">+30<span class="unit"></span></div>
+        <div class="input-desc">
+          <b>Lukas tour gap.</b> Days Lukas is dark around the DMB date. Weight raised from +14 after open-week shows hit at 50% empirically. Long gaps (10+ days) get the full bump; short gaps (5–9 days) get +20.
+        </div>
+      </div>
+      <div class="input">
+        <div class="input-label">Input · 03</div>
+        <div class="input-weight">+15<span class="unit"></span></div>
+        <div class="input-desc">
+          <b>Geographic proximity.</b> DMB venue near Lukas's tour path or in a city Lukas just played. Less binding than gap status; Jake will fly.
+        </div>
+      </div>
+      <div class="input">
+        <div class="input-label">Input · 04</div>
+        <div class="input-weight">+18<span class="unit"></span></div>
+        <div class="input-desc">
+          <b>Baseline floor.</b> Four tracked fiddlers in 2026: Jake Simpson, Casey Driessen, Tatiana Hargreaves, and Jason Crosby (NY/NJ geo-trigger, +25 bump at those shows). Floor doubled from 8% after the 14-show calibration data showed non-conflict shows rarely came in below 40%.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-num">02 · SEASON</div>
+    <h2 class="section-title">2026 tour at a glance</h2>
+    <p class="section-caption">
+      Three calendars stacked. Each tick is a show. DMB dates are colored by sit-in probability; Lukas Nelson and Casey Driessen are plotted underneath so gaps in either schedule are visible.
+    </p>
+    <div class="timeline-master" id="master-timeline-wrap">
+      <svg id="master-timeline" width="100%" height="200" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="timeline-master-legend">
+      <div class="legend-key"><span class="legend-mark high"></span> DMB &nbsp;ELEVATED</div>
+      <div class="legend-key"><span class="legend-mark"></span> DMB &nbsp;NEUTRAL</div>
+      <div class="legend-key"><span class="legend-mark low"></span> DMB &nbsp;LOW</div>
+      <div class="legend-key"><span class="legend-mark lukas"></span> LUKAS NELSON</div>
+      <div class="legend-key"><span class="legend-mark driessen"></span> CASEY DRIESSEN</div>
+      <div class="legend-key"><span class="legend-mark today"></span> TODAY · 14 JUN</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-num">03 · SCHEDULE</div>
+    <h2 class="section-title">All 37 shows</h2>
+    <p class="section-caption">
+      Every DMB 2026 date, past and upcoming. Each row's mini-timeline shows Lukas Nelson's activity in the 60 days around the DMB date so you can see why the score is what it is. Confirmed sit-ins keep their original forecast number visible.
+    </p>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="upcoming" role="tab" aria-selected="true">Upcoming<span class="count" id="count-upcoming"></span></button>
+      <button class="tab" data-tab="past" role="tab" aria-selected="false">Past<span class="count" id="count-past"></span></button>
+    </div>
+    <div class="shows-list" id="shows-list"></div>
+  </section>
+
+  <div class="footer">
+    <p>Past-show outcomes are kept on the page for calibration. As of 14 June, six of fourteen played shows have had a fiddle sit-in (43%). The first model under-predicted the medium tier; v2 was recalibrated 14 June with baseline raised 8% → 18% and open-week weight raised +14 → +30. Past forecasts below stay at their original numbers; upcoming shows use v2.</p>
+    <p>Tracked fiddlers: Jake Simpson (Lukas Nelson band, primary), Casey Driessen (solo / Bela Fleck collaborator, recurring), Tatiana Hargreaves (bluegrass fiddler, debuted 5 June Raleigh), Jason Crosby (NYC/NJ multi-instrumentalist, geo-triggered for tri-state shows). Sierra Hull confirmed as Gorge 9/6 opener — bonus fiddle in the room.</p>
+    <p>Sources: davematthewsband.com/tour, lukasnelson.com, setlist.fm, antsmarching.org, dmbalmanac.com, jambase.com. Tickets route to the official seller listed on the DMB tour page.</p>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const TODAY = new Date('2026-06-14');
+
+const DMB = [
+  { date:'2026-05-08', venue:'The Cynthia Woods Mitchell Pavilion', city:'The Woodlands, TX',  score: 4, outcome:'no-sitin', ticket:'https://www.ticketmaster.com/dave-matthews-band-the-woodlands-texas-05-08-2026/event/3A006433F705C091' },
+  { date:'2026-05-09', venue:'Dos Equis Pavilion',                  city:'Dallas, TX',          score: 4, outcome:'no-sitin' },
+  { date:'2026-05-11', venue:'Moody Center',                        city:'Austin, TX',          score:62, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:7, ticket:'https://moodycenteratx.com/event/dave-matthews-band-2026/' },
+  { date:'2026-05-15', venue:'Ameris Bank Amphitheatre',            city:'Alpharetta, GA',      score:18, outcome:'no-sitin' },
+  { date:'2026-05-16', venue:'Truliant Amphitheater',               city:'Charlotte, NC',       score:18, outcome:'sitin', sitinPlayer:'Casey Driessen', sitinNote:'debut · "Paper Town"' },
+  { date:'2026-05-25', venue:'The Wharf Amphitheater',              city:'Orange Beach, AL',    score:22, outcome:'no-sitin' },
+  { date:'2026-05-26', venue:'MIDFLORIDA Credit Union Amph.',       city:'Tampa, FL',           score:22, outcome:'no-sitin' },
+  { date:'2026-05-29', venue:'iTHINK Financial Amphitheatre',       city:'West Palm Beach, FL', score:22, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinNote:'heavy guest' },
+  { date:'2026-05-30', venue:'iTHINK Financial Amphitheatre',       city:'West Palm Beach, FL', score:22, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:6 },
+  { date:'2026-06-05', venue:'Coastal Credit Union Music Park',     city:'Raleigh, NC',         score:22, outcome:'sitin', sitinPlayer:'Tatiana Hargreaves', sitinSongs:4, sitinNote:'DMB debut' },
+  { date:'2026-06-06', venue:'Veterans United Home Loans Amph.',    city:'Virginia Beach, VA',  score:22, outcome:'no-sitin' },
+  { date:'2026-06-10', venue:'Forest Hills Stadium',                city:'Forest Hills, NY',    score:28, outcome:'sitin', sitinPlayer:'Casey Driessen', sitinSongs:5 },
+  { date:'2026-06-12', venue:'Xfinity Center',                      city:'Mansfield, MA',       score:22, outcome:'no-sitin' },
+  { date:'2026-06-13', venue:'Jiffy Lube Live',                     city:'Bristow, VA',         score:22, outcome:'no-sitin' },
+  // Upcoming (recalibrated 14 June: baseline 8 → 18, open-week weight +14 → +30)
+  { date:'2026-06-23', venue:'Mystic Lake Amphitheater',            city:'Shakopee, MN',        score:22, ticket:'' },
+  { date:'2026-06-24', venue:'Morton Amphitheater',                 city:'Kansas City, MO',     score:22, ticket:'' },
+  { date:'2026-06-26', venue:'Ruoff Music Center',                  city:'Noblesville, IN',     score:10, ticket:'' },
+  { date:'2026-06-27', venue:'Ruoff Music Center',                  city:'Noblesville, IN',     score:28, ticket:'' },
+  { date:'2026-07-07', venue:'Acrisure Amphitheater',               city:'Grand Rapids, MI',    score:20, ticket:'' },
+  { date:'2026-07-08', venue:'Acrisure Amphitheater',               city:'Grand Rapids, MI',    score:10, ticket:'' },
+  { date:'2026-07-10', venue:'Freedom Mortgage Pavilion',           city:'Camden, NJ',          score:30, ticket:'' },
+  { date:'2026-07-11', venue:'Freedom Mortgage Pavilion',           city:'Camden, NJ',          score:30, ticket:'' },
+  { date:'2026-07-14', venue:'BankNH Pavilion',                     city:'Gilford, NH',         score:10, ticket:'' },
+  { date:'2026-07-15', venue:'BankNH Pavilion',                     city:'Gilford, NH',         score:10, ticket:'' },
+  { date:'2026-07-17', venue:'Saratoga Performing Arts Center',     city:'Saratoga Springs, NY',score:75, ticket:'' },
+  { date:'2026-07-18', venue:'Saratoga Performing Arts Center',     city:'Saratoga Springs, NY',score:75, ticket:'' },
+  { date:'2026-07-21', venue:'Northwell Health at Jones Beach',     city:'Wantagh, NY',         score:58, ticket:'' },
+  { date:'2026-07-22', venue:'Darien Lake Amphitheater',            city:'Darien Center, NY',   score:58, ticket:'' },
+  { date:'2026-07-24', venue:'The Pavilion at Star Lake',           city:'Burgettstown, PA',    score:28, ticket:'' },
+  { date:'2026-07-25', venue:'The Meadows Music Theatre',           city:'Hartford, CT',        score:20, ticket:'' },
+  { date:'2026-08-28', venue:"Fiddler's Green Amphitheatre",        city:'Greenwood Village, CO',score:10, ticket:'' },
+  { date:'2026-08-29', venue:"Fiddler's Green Amphitheatre",        city:'Greenwood Village, CO',score:10, ticket:'' },
+  { date:'2026-09-04', venue:'The Gorge Amphitheatre',              city:'George, WA',          score:58, ticket:'' },
+  { date:'2026-09-05', venue:'The Gorge Amphitheatre',              city:'George, WA',          score:62, ticket:'' },
+  { date:'2026-09-06', venue:'The Gorge Amphitheatre',              city:'George, WA',          score:65, ticket:'' },
+  { date:'2026-09-25', venue:'Oceans Calling Festival',             city:'Ocean City, MD',      score:48, ticket:'' },
+  { date:'2026-09-27', venue:'Bourbon & Beyond',                    city:'Louisville, KY',      score:48, ticket:'' },
+];
+
+const LUKAS = [
+  { date:'2026-01-10', city:'Kahului, HI' },
+  { date:'2026-02-01', city:'Los Angeles, CA' },
+  { date:'2026-04-10', city:'Fort Lauderdale, FL' },
+  { date:'2026-04-12', city:'St. Petersburg, FL' },
+  { date:'2026-04-13', city:'Ponte Vedra Beach, FL' },
+  { date:'2026-04-17', city:'The Woodlands, TX' },
+  { date:'2026-04-19', city:'Philadelphia, MS' },
+  { date:'2026-04-20', city:'Philadelphia, MS' },
+  { date:'2026-04-22', city:'New Orleans, LA' },
+  { date:'2026-04-24', city:'Fredericksburg, TX' },
+  { date:'2026-05-05', city:'Tulsa, OK' },
+  { date:'2026-05-07', city:'Eureka Springs, AR' },
+  { date:'2026-05-08', city:'Tyler, TX' },
+  { date:'2026-05-09', city:'Austin, TX' },
+  { date:'2026-06-26', city:'Rexford, MT' },
+  { date:'2026-07-03', city:'Irving, TX' },
+  { date:'2026-07-04', city:'Austin, TX' },
+  { date:'2026-07-05', city:'The Woodlands, TX' },
+  { date:'2026-07-08', city:'Sandy, UT' },
+  { date:'2026-07-10', city:'Alta, WY' },
+  { date:'2026-07-11', city:'Alta, WY' },
+  { date:'2026-07-12', city:'Emigrant, MT' },
+  { date:'2026-07-14', city:'Calgary, AB' },
+  { date:'2026-07-15', city:'Saskatoon, SK' },
+  { date:'2026-07-16', city:'Edmonton, AB' },
+  { date:'2026-07-26', city:'Check, VA' },
+  { date:'2026-07-31', city:'Morrison, CO' },
+  { date:'2026-08-01', city:'Morrison, CO' },
+  { date:'2026-08-04', city:'Woodinville, WA' },
+  { date:'2026-08-05', city:'Woodinville, WA' },
+  { date:'2026-08-07', city:'Troutdale, OR' },
+  { date:'2026-08-08', city:'Bend, OR' },
+  { date:'2026-08-09', city:'Stateline, NV' },
+  { date:'2026-08-12', city:'Berkeley, CA' },
+  { date:'2026-08-13', city:'Santa Barbara, CA' },
+  { date:'2026-08-15', city:'Santa Ana, CA' },
+  { date:'2026-08-16', city:'San Diego, CA' },
+  { date:'2026-08-18', city:'Maryland Heights, MO' },
+  { date:'2026-08-19', city:'Shakopee, MN' },
+  { date:'2026-08-21', city:'East Troy, WI' },
+  { date:'2026-08-22', city:'Clarkston, MI' },
+  { date:'2026-08-23', city:'Noblesville, IN' },
+  { date:'2026-08-25', city:'Chicago, IL' },
+  { date:'2026-08-28', city:'Vienna, VA' },
+  { date:'2026-08-29', city:'Vienna, VA' },
+  { date:'2026-08-31', city:'Bethel, NY' },
+  { date:'2026-09-02', city:'Lenox, MA' },
+  { date:'2026-09-04', city:'Hyannis, MA' },
+  { date:'2026-09-05', city:'Cohasset, MA' },
+  { date:'2026-09-06', city:'Gilford, NH' },
+  { date:'2026-09-09', city:'Albany, NY' },
+  { date:'2026-09-10', city:'Shelburne, VT' },
+  { date:'2026-09-11', city:'Sidney, ME' },
+  { date:'2026-09-30', city:'Fresno, CA' },
+  { date:'2026-10-05', city:'San Luis Obispo, CA' },
+  { date:'2026-10-07', city:'Pioneertown, CA' },
+  { date:'2026-10-08', city:'Los Angeles, CA' },
+];
+
+const DRIESSEN = [
+  { date:'2026-07-20', city:'Lyons, CO' },
+  { date:'2026-08-19', city:'Brevard, NC' },
+  { date:'2026-08-20', city:'Brevard, NC' },
+  { date:'2026-08-21', city:'Brevard, NC' },
+  { date:'2026-08-22', city:'Brevard, NC' },
+];
+
+const TATIANA = [
+  { date:'2026-03-18', city:'Brooklyn, NY' },
+  { date:'2026-03-20', city:'Durham, NC' },
+  { date:'2026-06-10', city:'San Diego, CA' },
+];
+
+const CROSBY_GEO = ['NJ','NY','PA','CT'];
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAY = 86400000;
+
+function d(s) { return new Date(s + 'T00:00:00'); }
+function daysBetween(a, b) { return Math.round((d(b) - d(a)) / DAY); }
+function status(dateStr) { return d(dateStr) < TODAY ? 'past' : 'upcoming'; }
+
+function tier(s) {
+  if (s.score >= 50) return 'high';
+  if (s.score < 10) return 'low';
+  return 'medium';
+}
+
+function fmtDay(dateStr) {
+  const dt = d(dateStr);
+  return { num: String(dt.getDate()).padStart(2,'0'), mo: MONTHS[dt.getMonth()] };
+}
+
+function findLukasContext(dmbDate) {
+  const dmbD = d(dmbDate);
+  const sameDay = LUKAS.find(l => l.date === dmbDate);
+  const before = LUKAS.filter(l => d(l.date) < dmbD).sort((a,b)=>d(b.date)-d(a.date))[0];
+  const after  = LUKAS.filter(l => d(l.date) > dmbD).sort((a,b)=>d(a.date)-d(b.date))[0];
+  return {
+    sameDay, before, after,
+    daysSince: before ? daysBetween(before.date, dmbDate) : null,
+    daysTo:    after  ? daysBetween(dmbDate, after.date)  : null,
+  };
+}
+
+function findDriessenInWindow(dmbDate, halfDays) {
+  return DRIESSEN.filter(x => Math.abs(daysBetween(dmbDate, x.date)) <= halfDays);
+}
+
+// ============================================================
+// MASTER TIMELINE
+// ============================================================
+
+const TL_START = d('2026-05-01');
+const TL_END   = d('2026-10-15');
+const TL_DAYS  = (TL_END - TL_START) / DAY;
+
+function masterX(dateStr, width) {
+  const days = (d(dateStr) - TL_START) / DAY;
+  return (days / TL_DAYS) * width;
+}
+
+function renderMasterTimeline() {
+  const svg = document.getElementById('master-timeline');
+  const rect = svg.getBoundingClientRect();
+  const W = rect.width;
+  const H = 200;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = '';
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const make = (tag, attrs) => {
+    const el = document.createElementNS(ns, tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  };
+
+  const yDMB = 56;
+  const yLUK = 110;
+  const yDRI = 158;
+  const tickH = 18;
+
+  // Lane labels
+  [['DMB', yDMB], ['LUKAS NELSON', yLUK], ['CASEY DRIESSEN', yDRI]].forEach(([txt, y]) => {
+    const t = make('text', { x: 0, y: y - 22, 'font-size': 10, 'font-weight': 500, 'letter-spacing': '0.2em', fill: '#0A0A0A' });
+    t.textContent = txt;
+    svg.appendChild(t);
+  });
+
+  // Lane rules
+  [yDMB, yLUK, yDRI].forEach(y => {
+    svg.appendChild(make('line', { x1: 0, y1: y, x2: W, y2: y, stroke: '#E0E0E0', 'stroke-width': 1 }));
+  });
+
+  // Month gridlines + labels
+  const months = [
+    ['2026-05-01','MAY'],['2026-06-01','JUN'],['2026-07-01','JUL'],
+    ['2026-08-01','AUG'],['2026-09-01','SEP'],['2026-10-01','OCT'],
+  ];
+  months.forEach(([dt, lbl]) => {
+    const x = masterX(dt, W);
+    svg.appendChild(make('line', { x1: x, y1: 28, x2: x, y2: H - 24, stroke: '#F0F0F0', 'stroke-width': 1 }));
+    const t = make('text', { x: x + 4, y: H - 8, 'font-size': 10, 'font-weight': 500, 'letter-spacing': '0.16em', fill: '#8A8A8A' });
+    t.textContent = lbl;
+    svg.appendChild(t);
+  });
+
+  // Today line
+  const tx = masterX('2026-06-14', W);
+  svg.appendChild(make('line', { x1: tx, y1: 16, x2: tx, y2: H - 24, stroke: '#8A8A8A', 'stroke-width': 1, 'stroke-dasharray': '2 3' }));
+  const todayLbl = make('text', { x: tx + 6, y: 22, 'font-size': 10, 'font-weight': 500, 'letter-spacing': '0.14em', fill: '#8A8A8A' });
+  todayLbl.textContent = 'TODAY';
+  svg.appendChild(todayLbl);
+
+  // DMB ticks
+  DMB.forEach(s => {
+    const x = masterX(s.date, W);
+    const t = tier(s);
+    let color = '#0A0A0A';
+    if (t === 'high') color = '#1E7A3E';
+    else if (t === 'low') color = '#C44438';
+    const isPast = status(s.date) === 'past';
+    const opacity = isPast ? (s.outcome === 'sitin' ? 1 : 0.5) : 1;
+    svg.appendChild(make('line', {
+      x1: x, y1: yDMB - tickH/2, x2: x, y2: yDMB + tickH/2,
+      stroke: color, 'stroke-width': 2.5, opacity
+    }));
+    // Add a small mark above DMB sit-ins
+    if (s.outcome === 'sitin') {
+      svg.appendChild(make('circle', { cx: x, cy: yDMB - tickH/2 - 6, r: 2.5, fill: '#1E7A3E' }));
+    }
+  });
+
+  // Lukas ticks
+  LUKAS.forEach(l => {
+    const x = masterX(l.date, W);
+    const opacity = d(l.date) < TODAY ? 0.5 : 1;
+    svg.appendChild(make('line', {
+      x1: x, y1: yLUK - tickH/2, x2: x, y2: yLUK + tickH/2,
+      stroke: '#555', 'stroke-width': 2, opacity
+    }));
+  });
+
+  // Driessen ticks
+  DRIESSEN.forEach(x0 => {
+    const x = masterX(x0.date, W);
+    svg.appendChild(make('line', {
+      x1: x, y1: yDRI - tickH/2, x2: x, y2: yDRI + tickH/2,
+      stroke: '#999', 'stroke-width': 2
+    }));
+  });
+}
+
+// ============================================================
+// MINI TIMELINE (per row)
+// ============================================================
+
+function renderMiniTimeline(dmbDateStr) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const make = (tag, attrs) => {
+    const el = document.createElementNS(ns, tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  };
+
+  const W = 280;
+  const H = 36;
+  const svg = make('svg', { class: 'mini-timeline', viewBox: `0 0 ${W} ${H}`, width: '100%', height: H });
+
+  const halfDays = 30;
+  const dayPx = W / (halfDays * 2);
+  const cx = W / 2;
+  const baseY = 20;
+
+  // Axis
+  svg.appendChild(make('line', { x1: 0, y1: baseY, x2: W, y2: baseY, stroke: '#E0E0E0', 'stroke-width': 1 }));
+
+  // Week marks
+  for (let off = -28; off <= 28; off += 7) {
+    if (off === 0) continue;
+    const x = cx + off * dayPx;
+    svg.appendChild(make('line', { x1: x, y1: baseY - 3, x2: x, y2: baseY + 3, stroke: '#EEE', 'stroke-width': 1 }));
+  }
+
+  // Lukas shows in window
+  LUKAS.forEach(l => {
+    const diff = daysBetween(dmbDateStr, l.date);
+    if (Math.abs(diff) > halfDays) return;
+    const x = cx + diff * dayPx;
+    svg.appendChild(make('circle', { cx: x, cy: baseY, r: 3, fill: '#555' }));
+  });
+
+  // Driessen shows in window (hollow squares, slightly above)
+  DRIESSEN.forEach(x0 => {
+    const diff = daysBetween(dmbDateStr, x0.date);
+    if (Math.abs(diff) > halfDays) return;
+    const x = cx + diff * dayPx;
+    svg.appendChild(make('rect', { x: x - 2.5, y: baseY - 8, width: 5, height: 5, fill: 'none', stroke: '#999', 'stroke-width': 1 }));
+  });
+
+  // Today marker (if in window)
+  const todayDiff = daysBetween(dmbDateStr, '2026-06-14');
+  if (Math.abs(todayDiff) <= halfDays) {
+    const x = cx + todayDiff * dayPx;
+    svg.appendChild(make('line', { x1: x, y1: 6, x2: x, y2: H - 4, stroke: '#8A8A8A', 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
+  }
+
+  // DMB show marker
+  svg.appendChild(make('line', { x1: cx, y1: 4, x2: cx, y2: H - 2, stroke: '#0A0A0A', 'stroke-width': 2 }));
+
+  // Edge labels
+  const lbl1 = make('text', { x: 0, y: H - 1, 'font-size': 8, 'letter-spacing': '0.1em', fill: '#B5B5B5' });
+  lbl1.textContent = '−30d';
+  svg.appendChild(lbl1);
+  const lbl2 = make('text', { x: W, y: H - 1, 'font-size': 8, 'letter-spacing': '0.1em', fill: '#B5B5B5', 'text-anchor': 'end' });
+  lbl2.textContent = '+30d';
+  svg.appendChild(lbl2);
+
+  return svg;
+}
+
+// ============================================================
+// ROW RENDER
+// ============================================================
+
+function renderShowRow(show) {
+  const row = document.createElement('div');
+  row.className = 'show';
+  row.dataset.tier = tier(show);
+  row.dataset.status = status(show.date);
+  if (show.outcome) row.dataset.outcome = show.outcome;
+
+  const dd = fmtDay(show.date);
+  const ctx = findLukasContext(show.date);
+  const driessenInWindow = findDriessenInWindow(show.date, 30);
+
+  // Date
+  const dateEl = document.createElement('div');
+  dateEl.className = 'date';
+  dateEl.innerHTML = `<span class="date-num">${dd.num}</span><span class="date-mo">${dd.mo}</span>`;
+
+  // Why-line (pre-outcome reasoning)
+  let why = '';
+  if (ctx.sameDay) {
+    why = `Lukas plays ${ctx.sameDay.city.split(',')[0]} same night`;
+  } else if (ctx.daysSince !== null && Math.min(ctx.daysSince, ctx.daysTo||999) >= 10) {
+    why = `Lukas in a long open stretch`;
+  } else if (ctx.daysSince !== null && Math.min(ctx.daysSince, ctx.daysTo||999) >= 5) {
+    why = `Lukas open week`;
+  } else {
+    why = `Lukas on tour nearby`;
+  }
+
+  const venue = document.createElement('div');
+  venue.className = 'venue';
+  venue.innerHTML = `
+    <div class="venue-name">${show.venue}</div>
+    <div class="venue-city">${show.city}</div>
+    <div class="why">${why}</div>
+  `;
+
+  // Mini-timeline + inputs
+  const mini = document.createElement('div');
+  mini.className = 'mini-col';
+  mini.appendChild(renderMiniTimeline(show.date));
+  const inputs = document.createElement('div');
+  inputs.className = 'mini-inputs';
+  const lastTxt = ctx.before
+    ? `${ctx.daysSince}d ago · ${ctx.before.city.split(',')[0]}`
+    : '—';
+  const nextTxt = ctx.after
+    ? `${ctx.daysTo}d away · ${ctx.after.city.split(',')[0]}`
+    : '—';
+  let inputRows = `
+    <div class="row"><span class="k">Lukas last</span><span class="v">${lastTxt}</span></div>
+    <div class="row"><span class="k">Lukas next</span><span class="v">${nextTxt}</span></div>
+  `;
+  if (driessenInWindow.length) {
+    const closest = driessenInWindow.reduce((a,b) => Math.abs(daysBetween(show.date,a.date)) < Math.abs(daysBetween(show.date,b.date)) ? a : b);
+    const diff = daysBetween(show.date, closest.date);
+    const word = diff < 0 ? `${-diff}d ago` : (diff > 0 ? `${diff}d away` : 'same day');
+    inputRows += `<div class="row"><span class="k">Driessen</span><span class="v">${word} · ${closest.city.split(',')[0]}</span></div>`;
+  }
+  inputs.innerHTML = inputRows;
+  mini.appendChild(inputs);
+
+  // Metric
+  const metric = document.createElement('div');
+  metric.className = 'metric';
+  const showArrow = !!show.ticket && !show.outcome;
+  const probHTML = `<span class="prob">${show.score}%</span>${showArrow ? '<span class="arrow">&rarr;</span>' : ''}`;
+  const probLine = show.ticket && !show.outcome
+    ? `<a class="prob-line" href="${show.ticket}" target="_blank" rel="noopener">${probHTML}</a>`
+    : `<span class="prob-line">${probHTML}</span>`;
+  let outcomeLine = '';
+  if (show.outcome === 'sitin') {
+    const parts = [`✓ ${show.sitinPlayer}`];
+    if (show.sitinSongs) parts.push(`${show.sitinSongs} songs`);
+    if (show.sitinNote) parts.push(show.sitinNote);
+    outcomeLine = `<div class="outcome sitin">${parts.join(' · ')}</div>`;
+  } else if (show.outcome === 'no-sitin') {
+    outcomeLine = `<div class="outcome no-sitin">No sit-in</div>`;
+  }
+  metric.innerHTML = `
+    ${probLine}
+    <div class="prob-bar-track"><div class="prob-bar" style="width: ${show.score}%;"></div></div>
+    ${outcomeLine}
+  `;
+
+  row.appendChild(dateEl);
+  row.appendChild(venue);
+  row.appendChild(mini);
+  row.appendChild(metric);
+  return row;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+function setTab(name) {
+  document.querySelectorAll('.tab').forEach(t => {
+    const on = t.dataset.tab === name;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-selected', on);
+  });
+  document.querySelectorAll('.show').forEach(s => {
+    s.style.display = s.dataset.status === name ? '' : 'none';
+  });
+}
+
+function init() {
+  renderMasterTimeline();
+  const list = document.getElementById('shows-list');
+  let upcoming = 0, past = 0;
+  DMB.forEach(s => {
+    list.appendChild(renderShowRow(s));
+    if (status(s.date) === 'past') past++; else upcoming++;
+  });
+  document.getElementById('count-upcoming').textContent = ' · ' + upcoming;
+  document.getElementById('count-past').textContent = ' · ' + past;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => setTab(t.dataset.tab));
+  });
+  setTab('upcoming');
+}
+
+window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('resize', () => { renderMasterTimeline(); });
+</script>
+
+</body>
+</html>
