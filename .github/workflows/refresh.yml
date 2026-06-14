@@ -2,8 +2,10 @@ name: Daily data refresh
 
 on:
   schedule:
-    # 09:00 UTC = 05:00 ET, runs daily
-    - cron: '0 9 * * *'
+    # 10am Pacific (17:00 UTC during PDT, 18:00 UTC during PST)
+    - cron: '0 17 * * *'
+    # 10pm Pacific (05:00 UTC next day during PDT, 06:00 UTC during PST)
+    - cron: '0 5 * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -19,12 +21,13 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Run refresh script
         run: node scripts/refresh.mjs
-        # To wire full data refresh later, set ANTHROPIC_API_KEY as a repo secret
-        # and uncomment:
-        # env:
-        #   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Commit if changed
         run: |

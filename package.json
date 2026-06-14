@@ -1,0 +1,13 @@
+{
+  "name": "fiddle-reprise",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "FiddleReprise refresh tooling",
+  "scripts": {
+    "refresh": "node scripts/refresh.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0"
+  }
+}

@@ -181,7 +181,6 @@
   /* ============ Master timeline ============ */
   .timeline-master {
     width: 100%;
-    border-top: 1px solid var(--ink);
     border-bottom: 1px solid var(--ink);
     padding: 28px 0 12px;
   }
@@ -446,24 +445,17 @@
     </div>
   </header>
 
-  <section class="section">
-    <div class="section-num">01 · SEASON</div>
-    <h2 class="section-title">2026 tour at a glance</h2>
-    <p class="section-caption">
-      Three calendars stacked. Each tick is a show. DMB dates are colored by sit-in probability; Lukas Nelson and Casey Driessen are plotted underneath so gaps in either schedule are visible.
-    </p>
-    <div class="timeline-master" id="master-timeline-wrap">
-      <svg id="master-timeline" width="100%" height="200" preserveAspectRatio="none"></svg>
-    </div>
-    <div class="timeline-master-legend">
-      <div class="legend-key"><span class="legend-mark high"></span> DMB &nbsp;ELEVATED</div>
-      <div class="legend-key"><span class="legend-mark"></span> DMB &nbsp;NEUTRAL</div>
-      <div class="legend-key"><span class="legend-mark low"></span> DMB &nbsp;LOW</div>
-      <div class="legend-key"><span class="legend-mark lukas"></span> LUKAS NELSON</div>
-      <div class="legend-key"><span class="legend-mark driessen"></span> CASEY DRIESSEN</div>
-      <div class="legend-key"><span class="legend-mark today"></span> TODAY · 14 JUN</div>
-    </div>
-  </section>
+  <div class="timeline-master" id="master-timeline-wrap">
+    <svg id="master-timeline" width="100%" height="200" preserveAspectRatio="none"></svg>
+  </div>
+  <div class="timeline-master-legend">
+    <div class="legend-key"><span class="legend-mark high"></span> DMB &nbsp;ELEVATED</div>
+    <div class="legend-key"><span class="legend-mark"></span> DMB &nbsp;NEUTRAL</div>
+    <div class="legend-key"><span class="legend-mark low"></span> DMB &nbsp;LOW</div>
+    <div class="legend-key"><span class="legend-mark lukas"></span> JAKE SIMPSON</div>
+    <div class="legend-key"><span class="legend-mark driessen"></span> CASEY DRIESSEN</div>
+    <div class="legend-key"><span class="legend-mark today"></span> TODAY · 14 JUN</div>
+  </div>
 
   <section class="section">
     <div class="section-num">02 · SCHEDULE</div>
@@ -513,7 +505,7 @@
         <div class="input-label">Input · 02</div>
         <div class="input-weight">+30<span class="unit"></span></div>
         <div class="input-desc">
-          <b>Jake Simpson's availability.</b> Lukas Nelson's tour calendar is a proxy for Jake's. Long gaps in Lukas's schedule mean Jake is free to travel. The Gorge run in Aug 2025 happened during a 5-week Lukas gap.
+          <b>Jake Simpson's availability.</b> Tracked via Lukas Nelson's tour calendar (Jake's primary commitment) combined with Jake's own confirmed DMB sit-in nights. Long stretches without activity mean Jake is free to travel. The Gorge run in Aug 2025 happened during a 5-week Lukas gap.
         </div>
       </div>
       <div class="input">
@@ -608,10 +600,10 @@ const DMB = [
   { date:'2026-06-12', venue:'Xfinity Center',                      city:'Mansfield, MA',       score:48, outcome:'no-sitin' },
   { date:'2026-06-13', venue:'Jiffy Lube Live',                     city:'Bristow, VA',         score:48, outcome:'no-sitin' },
   // Upcoming
-  { date:'2026-06-23', venue:'Mystic Lake Amphitheater',            city:'Shakopee, MN',        score:22, ticket:'' },
-  { date:'2026-06-24', venue:'Morton Amphitheater',                 city:'Kansas City, MO',     score:22, ticket:'' },
+  { date:'2026-06-23', venue:'Mystic Lake Amphitheater',            city:'Shakopee, MN',        score:48, ticket:'' },
+  { date:'2026-06-24', venue:'Morton Amphitheater',                 city:'Kansas City, MO',     score:46, ticket:'' },
   { date:'2026-06-26', venue:'Ruoff Music Center',                  city:'Noblesville, IN',     score:10, ticket:'' },
-  { date:'2026-06-27', venue:'Ruoff Music Center',                  city:'Noblesville, IN',     score:28, ticket:'' },
+  { date:'2026-06-27', venue:'Ruoff Music Center',                  city:'Noblesville, IN',     score:38, ticket:'' },
   { date:'2026-07-07', venue:'Acrisure Amphitheater',               city:'Grand Rapids, MI',    score:20, ticket:'' },
   { date:'2026-07-08', venue:'Acrisure Amphitheater',               city:'Grand Rapids, MI',    score:10, ticket:'' },
   { date:'2026-07-10', venue:'Freedom Mortgage Pavilion',           city:'Camden, NJ',          score:30, ticket:'' },
@@ -633,7 +625,18 @@ const DMB = [
   { date:'2026-09-27', venue:'Bourbon & Beyond',                    city:'Louisville, KY',      score:48, ticket:'' },
 ];
 
-const LUKAS = [
+const JAKE = [
+  // Jake's confirmed DMB sit-in nights (he was at these DMB shows)
+  { date:'2025-08-01', city:'Big Sky, MT',         isDmbSitIn:true },
+  { date:'2025-08-02', city:'Big Sky, MT',         isDmbSitIn:true },
+  { date:'2025-08-29', city:'George, WA',          isDmbSitIn:true },
+  { date:'2025-08-30', city:'George, WA',          isDmbSitIn:true },
+  { date:'2025-08-31', city:'George, WA',          isDmbSitIn:true },
+  { date:'2025-09-20', city:'Minneapolis, MN',     isDmbSitIn:true },
+  { date:'2026-05-11', city:'Austin, TX',          isDmbSitIn:true },
+  { date:'2026-05-29', city:'West Palm Beach, FL', isDmbSitIn:true },
+  { date:'2026-05-30', city:'West Palm Beach, FL', isDmbSitIn:true },
+  // Jake's primary touring band — Lukas Nelson's 2026 tour
   { date:'2026-01-10', city:'Kahului, HI' },
   { date:'2026-02-01', city:'Los Angeles, CA' },
   { date:'2026-04-10', city:'Fort Lauderdale, FL' },
@@ -765,11 +768,11 @@ function renderGaugeSVG(score) {
   return `<svg class="gauge" viewBox="0 0 124 70" xmlns="http://www.w3.org/2000/svg">${paths}${innerHalf}${needle}${hub}</svg>`;
 }
 
-function findLukasContext(dmbDate) {
+function findJakeContext(dmbDate) {
   const dmbD = d(dmbDate);
-  const sameDay = LUKAS.find(l => l.date === dmbDate);
-  const before = LUKAS.filter(l => d(l.date) < dmbD).sort((a,b)=>d(b.date)-d(a.date))[0];
-  const after  = LUKAS.filter(l => d(l.date) > dmbD).sort((a,b)=>d(a.date)-d(b.date))[0];
+  const sameDay = JAKE.find(l => l.date === dmbDate && !l.isDmbSitIn);
+  const before = JAKE.filter(l => d(l.date) < dmbD).sort((a,b)=>d(b.date)-d(a.date))[0];
+  const after  = JAKE.filter(l => d(l.date) > dmbD).sort((a,b)=>d(a.date)-d(b.date))[0];
   return {
     sameDay, before, after,
     daysSince: before ? daysBetween(before.date, dmbDate) : null,
@@ -815,7 +818,7 @@ function renderMasterTimeline() {
   const tickH = 18;
 
   // Lane labels
-  [['DMB', yDMB], ['LUKAS NELSON', yLUK], ['CASEY DRIESSEN', yDRI]].forEach(([txt, y]) => {
+  [['DMB', yDMB], ['JAKE SIMPSON', yLUK], ['CASEY DRIESSEN', yDRI]].forEach(([txt, y]) => {
     const t = make('text', { x: 0, y: y - 22, 'font-size': 10, 'font-weight': 500, 'letter-spacing': '0.2em', fill: '#0A0A0A' });
     t.textContent = txt;
     svg.appendChild(t);
@@ -866,7 +869,7 @@ function renderMasterTimeline() {
   });
 
   // Lukas ticks
-  LUKAS.forEach(l => {
+  JAKE.forEach(l => {
     const x = masterX(l.date, W);
     const opacity = d(l.date) < TODAY ? 0.5 : 1;
     svg.appendChild(make('line', {
@@ -917,7 +920,7 @@ function renderMiniTimeline(dmbDateStr) {
   }
 
   // Lukas shows in window
-  LUKAS.forEach(l => {
+  JAKE.forEach(l => {
     const diff = daysBetween(dmbDateStr, l.date);
     if (Math.abs(diff) > halfDays) return;
     const x = cx + diff * dayPx;
@@ -965,7 +968,7 @@ function renderShowRow(show) {
   if (show.outcome) row.dataset.outcome = show.outcome;
 
   const dd = fmtDay(show.date);
-  const ctx = findLukasContext(show.date);
+  const ctx = findJakeContext(show.date);
   const driessenInWindow = findDriessenInWindow(show.date, 30);
 
   // Date
@@ -976,13 +979,13 @@ function renderShowRow(show) {
   // Why-line (pre-outcome reasoning)
   let why = '';
   if (ctx.sameDay) {
-    why = `Lukas plays ${ctx.sameDay.city.split(',')[0]} same night`;
-  } else if (ctx.daysSince !== null && Math.min(ctx.daysSince, ctx.daysTo||999) >= 10) {
-    why = `Lukas in a long open stretch`;
+    why = `Jake on tour with Lukas in ${ctx.sameDay.city.split(',')[0]}`;
+  } else if (ctx.daysSince !== null && ctx.daysSince >= 10) {
+    why = `Jake in a long open stretch · ${ctx.daysSince}d dark`;
   } else if (ctx.daysSince !== null && Math.min(ctx.daysSince, ctx.daysTo||999) >= 5) {
-    why = `Lukas open week`;
+    why = `Jake open week`;
   } else {
-    why = `Lukas on tour nearby`;
+    why = `Jake's tour active these days`;
   }
 
   const venue = document.createElement('div');
@@ -1006,8 +1009,8 @@ function renderShowRow(show) {
     ? `${ctx.daysTo}d away · ${ctx.after.city.split(',')[0]}`
     : '–';
   let inputRows = `
-    <div class="row"><span class="k">Lukas last</span><span class="v">${lastTxt}</span></div>
-    <div class="row"><span class="k">Lukas next</span><span class="v">${nextTxt}</span></div>
+    <div class="row"><span class="k">Jake last</span><span class="v">${lastTxt}</span></div>
+    <div class="row"><span class="k">Jake next</span><span class="v">${nextTxt}</span></div>
   `;
   if (driessenInWindow.length) {
     const closest = driessenInWindow.reduce((a,b) => Math.abs(daysBetween(show.date,a.date)) < Math.abs(daysBetween(show.date,b.date)) ? a : b);
