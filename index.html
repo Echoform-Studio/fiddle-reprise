@@ -79,12 +79,7 @@
 
   /* ============ Section headers ============ */
   .section { padding-top: 80px; }
-  .section-num {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    color: var(--muted);
-  }
+  .section-num { display: none; }
   .section-title {
     font-size: 28px;
     font-weight: 500;
@@ -218,7 +213,6 @@
     gap: 32px;
     margin-top: 16px;
     margin-bottom: 4px;
-    border-bottom: 1px solid var(--rule);
   }
   .tab {
     background: none;
@@ -284,6 +278,15 @@
     display: block;
     margin-top: 6px;
     color: var(--muted);
+  }
+  .date-yr {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    color: var(--muted-2);
+    display: block;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Venue */
@@ -355,20 +358,22 @@
     line-height: 1;
   }
   .arrow { font-size: 16px; line-height: 1; }
-  .prob-bar-track {
-    height: 2px;
-    background: var(--rule);
-    width: 100%;
-    margin: 12px 0 0 auto;
-    position: relative;
+  .gauge {
+    display: block;
+    margin: 10px 0 0 auto;
+    width: 124px;
+    height: 70px;
   }
-  .prob-bar {
-    height: 2px;
-    background: var(--ink);
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
+  .gauge-seg-very-low  { fill: #DC3838; }
+  .gauge-seg-low       { fill: #E68476; }
+  .gauge-seg-lean-low  { fill: #F1C2BB; }
+  .gauge-seg-tossup    { fill: #D8D8D8; }
+  .gauge-seg-lean-high { fill: #BFD9C4; }
+  .gauge-seg-likely    { fill: #6FB17A; }
+  .gauge-seg-very-high { fill: #25A050; }
+  .gauge-needle { fill: var(--ink); }
+  .gauge-hub { fill: var(--ink); }
+  .gauge-inner { fill: var(--bg); }
 
   .outcome {
     margin-top: 12px;
@@ -481,7 +486,7 @@
       <div class="callout-stats">
         <div>
           <span class="callout-label">Model expected</span>
-          <span class="callout-num">13<span class="unit">&thinsp;sit-ins</span></span>
+          <span class="callout-num">18<span class="unit">&thinsp;sit-ins</span></span>
         </div>
         <div>
           <span class="callout-label">Actual</span>
@@ -489,7 +494,7 @@
         </div>
       </div>
       <div class="callout-body">
-        Across the 54 played shows since spring 2025, the model expected ~13 fiddle sit-ins. Thirteen occurred. The closer those two numbers, the better calibrated the score. The page tracks both as the tour progresses.
+        Across the 54 played shows since spring 2025, the model expected ~18 fiddle sit-ins. Thirteen occurred. The model casts a slightly wider net than reality (better to surface a possible sit-in than miss one). The page tracks both numbers as the tour progresses.
       </div>
     </div>
 
@@ -553,7 +558,7 @@ const DMB = [
   { date:'2025-05-27', venue:"St. Joseph's Health Amphitheater",      city:'Syracuse, NY',        score:18, outcome:'no-sitin' },
   { date:'2025-05-30', venue:'Blossom Music Center',                  city:'Cuyahoga Falls, OH',  score:18, outcome:'no-sitin' },
   { date:'2025-05-31', venue:'Merriweather Post Pavilion',            city:'Columbia, MD',        score:18, outcome:'no-sitin' },
-  { date:'2025-06-03', venue:'PNC Bank Arts Center',                  city:'Holmdel, NJ',         score:35, outcome:'sitin', sitinPlayer:'Jason Crosby', sitinSongs:2, sitinNote:'Pig + Ants Marching' },
+  { date:'2025-06-03', venue:'PNC Bank Arts Center',                  city:'Holmdel, NJ',         score:43, outcome:'sitin', sitinPlayer:'Jason Crosby', sitinSongs:2, sitinNote:'Pig + Ants Marching' },
   { date:'2025-06-07', venue:'Parque do Ibirapuera',                  city:'São Paulo, Brazil',   score:18, outcome:'no-sitin' },
   { date:'2025-06-08', venue:'Parque do Ibirapuera',                  city:'São Paulo, Brazil',   score:18, outcome:'no-sitin' },
   { date:'2025-06-11', venue:'Northwell at Jones Beach Theater',      city:'Wantagh, NY',         score:18, outcome:'no-sitin' },
@@ -571,37 +576,37 @@ const DMB = [
   { date:'2025-07-12', venue:'Ruoff Music Center',                    city:'Noblesville, IN',     score:18, outcome:'no-sitin' },
   { date:'2025-07-15', venue:'Allianz Amphitheater at Riverfront',    city:'Richmond, VA',        score:18, outcome:'no-sitin' },
   { date:'2025-07-16', venue:'Allianz Amphitheater at Riverfront',    city:'Richmond, VA',        score:18, outcome:'no-sitin' },
-  { date:'2025-07-18', venue:'Broadview Stage at SPAC',               city:'Saratoga Springs, NY',score:18, outcome:'no-sitin' },
-  { date:'2025-07-19', venue:'Broadview Stage at SPAC',               city:'Saratoga Springs, NY',score:18, outcome:'no-sitin' },
+  { date:'2025-07-18', venue:'Broadview Stage at SPAC',               city:'Saratoga Springs, NY',score:28, outcome:'no-sitin' },
+  { date:'2025-07-19', venue:'Broadview Stage at SPAC',               city:'Saratoga Springs, NY',score:28, outcome:'no-sitin' },
   { date:'2025-07-22', venue:'BankNH Pavilion',                       city:'Gilford, NH',         score:18, outcome:'no-sitin' },
   { date:'2025-07-23', venue:'BankNH Pavilion',                       city:'Gilford, NH',         score:18, outcome:'no-sitin' },
   { date:'2025-07-25', venue:'Freedom Mortgage Pavilion',             city:'Camden, NJ',          score:18, outcome:'no-sitin' },
   { date:'2025-07-26', venue:'Freedom Mortgage Pavilion',             city:'Camden, NJ',          score:18, outcome:'no-sitin' },
-  { date:'2025-08-01', venue:'Wildlands Festival',                    city:'Big Sky, MT',         score:60, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinNote:'shared bill with Lukas Nelson' },
-  { date:'2025-08-02', venue:'Wildlands Festival',                    city:'Big Sky, MT',         score:60, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinNote:'shared bill with Lukas Nelson' },
+  { date:'2025-08-01', venue:'Wildlands Festival',                    city:'Big Sky, MT',         score:68, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinNote:'shared bill with Lukas Nelson' },
+  { date:'2025-08-02', venue:'Wildlands Festival',                    city:'Big Sky, MT',         score:68, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinNote:'shared bill with Lukas Nelson' },
   { date:'2025-08-22', venue:'Kia Forum',                             city:'Inglewood, CA',       score:18, outcome:'no-sitin' },
   { date:'2025-08-23', venue:'Shoreline Amphitheatre',                city:'Mountain View, CA',   score:18, outcome:'no-sitin' },
   { date:'2025-08-26', venue:'Lake Tahoe Amphitheatre',               city:'Stateline, NV',       score:18, outcome:'no-sitin' },
-  { date:'2025-08-29', venue:'The Gorge Amphitheatre',                city:'George, WA',          score:55, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:2, sitinNote:'Lie In Our Graves + Ants Marching' },
-  { date:'2025-08-30', venue:'The Gorge Amphitheatre',                city:'George, WA',          score:60, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:4, sitinNote:'full Before These Crowded Streets with Béla Fleck' },
-  { date:'2025-08-31', venue:'The Gorge Amphitheatre',                city:'George, WA',          score:65, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:2, sitinNote:'Grace Is Gone + Warehouse' },
-  { date:'2025-09-20', venue:'Farm Aid 40 (Huntington Bank Stadium)', city:'Minneapolis, MN',     score:65, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:3, sitinNote:'Dave & Tim acoustic set, shared bill with Lukas' },
+  { date:'2025-08-29', venue:'The Gorge Amphitheatre',                city:'George, WA',          score:78, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:2, sitinNote:'Lie In Our Graves + Ants Marching' },
+  { date:'2025-08-30', venue:'The Gorge Amphitheatre',                city:'George, WA',          score:78, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:4, sitinNote:'full Before These Crowded Streets with Béla Fleck' },
+  { date:'2025-08-31', venue:'The Gorge Amphitheatre',                city:'George, WA',          score:78, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:2, sitinNote:'Grace Is Gone + Warehouse' },
+  { date:'2025-09-20', venue:'Farm Aid 40 (Huntington Bank Stadium)', city:'Minneapolis, MN',     score:68, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:3, sitinNote:'Dave & Tim acoustic set, shared bill with Lukas' },
 
   // 2026 tour
-  { date:'2026-05-08', venue:'The Cynthia Woods Mitchell Pavilion', city:'The Woodlands, TX',  score: 4, outcome:'no-sitin', ticket:'https://www.ticketmaster.com/dave-matthews-band-the-woodlands-texas-05-08-2026/event/3A006433F705C091' },
-  { date:'2026-05-09', venue:'Dos Equis Pavilion',                  city:'Dallas, TX',          score: 4, outcome:'no-sitin' },
-  { date:'2026-05-11', venue:'Moody Center',                        city:'Austin, TX',          score:62, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:7, ticket:'https://moodycenteratx.com/event/dave-matthews-band-2026/' },
-  { date:'2026-05-15', venue:'Ameris Bank Amphitheatre',            city:'Alpharetta, GA',      score:18, outcome:'no-sitin' },
-  { date:'2026-05-16', venue:'Truliant Amphitheater',               city:'Charlotte, NC',       score:18, outcome:'sitin', sitinPlayer:'Casey Driessen', sitinNote:'debut · "Paper Town"' },
-  { date:'2026-05-25', venue:'The Wharf Amphitheater',              city:'Orange Beach, AL',    score:22, outcome:'no-sitin' },
-  { date:'2026-05-26', venue:'MIDFLORIDA Credit Union Amph.',       city:'Tampa, FL',           score:22, outcome:'no-sitin' },
-  { date:'2026-05-29', venue:'iTHINK Financial Amphitheatre',       city:'West Palm Beach, FL', score:22, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinNote:'heavy guest' },
-  { date:'2026-05-30', venue:'iTHINK Financial Amphitheatre',       city:'West Palm Beach, FL', score:22, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:6 },
-  { date:'2026-06-05', venue:'Coastal Credit Union Music Park',     city:'Raleigh, NC',         score:22, outcome:'sitin', sitinPlayer:'Tatiana Hargreaves', sitinSongs:4, sitinNote:'DMB debut' },
-  { date:'2026-06-06', venue:'Veterans United Home Loans Amph.',    city:'Virginia Beach, VA',  score:22, outcome:'no-sitin' },
-  { date:'2026-06-10', venue:'Forest Hills Stadium',                city:'Forest Hills, NY',    score:28, outcome:'sitin', sitinPlayer:'Casey Driessen', sitinSongs:5 },
-  { date:'2026-06-12', venue:'Xfinity Center',                      city:'Mansfield, MA',       score:22, outcome:'no-sitin' },
-  { date:'2026-06-13', venue:'Jiffy Lube Live',                     city:'Bristow, VA',         score:22, outcome:'no-sitin' },
+  { date:'2026-05-08', venue:'The Cynthia Woods Mitchell Pavilion', city:'The Woodlands, TX',  score: 8, outcome:'no-sitin', ticket:'https://www.ticketmaster.com/dave-matthews-band-the-woodlands-texas-05-08-2026/event/3A006433F705C091' },
+  { date:'2026-05-09', venue:'Dos Equis Pavilion',                  city:'Dallas, TX',          score: 8, outcome:'no-sitin' },
+  { date:'2026-05-11', venue:'Moody Center',                        city:'Austin, TX',          score:73, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:7, ticket:'https://moodycenteratx.com/event/dave-matthews-band-2026/' },
+  { date:'2026-05-15', venue:'Ameris Bank Amphitheatre',            city:'Alpharetta, GA',      score:48, outcome:'no-sitin' },
+  { date:'2026-05-16', venue:'Truliant Amphitheater',               city:'Charlotte, NC',       score:53, outcome:'sitin', sitinPlayer:'Casey Driessen', sitinNote:'debut · "Paper Town"' },
+  { date:'2026-05-25', venue:'The Wharf Amphitheater',              city:'Orange Beach, AL',    score:48, outcome:'no-sitin' },
+  { date:'2026-05-26', venue:'MIDFLORIDA Credit Union Amph.',       city:'Tampa, FL',           score:48, outcome:'no-sitin' },
+  { date:'2026-05-29', venue:'iTHINK Financial Amphitheatre',       city:'West Palm Beach, FL', score:48, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinNote:'heavy guest' },
+  { date:'2026-05-30', venue:'iTHINK Financial Amphitheatre',       city:'West Palm Beach, FL', score:48, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:6 },
+  { date:'2026-06-05', venue:'Coastal Credit Union Music Park',     city:'Raleigh, NC',         score:53, outcome:'sitin', sitinPlayer:'Tatiana Hargreaves', sitinSongs:4, sitinNote:'DMB debut' },
+  { date:'2026-06-06', venue:'Veterans United Home Loans Amph.',    city:'Virginia Beach, VA',  score:48, outcome:'no-sitin' },
+  { date:'2026-06-10', venue:'Forest Hills Stadium',                city:'Forest Hills, NY',    score:83, outcome:'sitin', sitinPlayer:'Casey Driessen', sitinSongs:5 },
+  { date:'2026-06-12', venue:'Xfinity Center',                      city:'Mansfield, MA',       score:48, outcome:'no-sitin' },
+  { date:'2026-06-13', venue:'Jiffy Lube Live',                     city:'Bristow, VA',         score:48, outcome:'no-sitin' },
   // Upcoming
   { date:'2026-06-23', venue:'Mystic Lake Amphitheater',            city:'Shakopee, MN',        score:22, ticket:'' },
   { date:'2026-06-24', venue:'Morton Amphitheater',                 city:'Kansas City, MO',     score:22, ticket:'' },
@@ -723,7 +728,41 @@ function tier(s) {
 
 function fmtDay(dateStr) {
   const dt = d(dateStr);
-  return { num: String(dt.getDate()).padStart(2,'0'), mo: MONTHS[dt.getMonth()] };
+  return {
+    num: String(dt.getDate()).padStart(2,'0'),
+    mo:  MONTHS[dt.getMonth()],
+    yr:  String(dt.getFullYear())
+  };
+}
+
+function renderGaugeSVG(score) {
+  const cx = 62, cy = 62, R = 56, r = 26;
+  const segs = ['gauge-seg-very-low','gauge-seg-low','gauge-seg-lean-low','gauge-seg-tossup','gauge-seg-lean-high','gauge-seg-likely','gauge-seg-very-high'];
+  const segSpan = 180 / segs.length;
+  const paths = segs.map((cls, i) => {
+    const startA = (180 + i * segSpan) * Math.PI / 180;
+    const endA   = (180 + (i+1) * segSpan) * Math.PI / 180;
+    const x1 = (cx + R * Math.cos(startA)).toFixed(2);
+    const y1 = (cy + R * Math.sin(startA)).toFixed(2);
+    const x2 = (cx + R * Math.cos(endA)).toFixed(2);
+    const y2 = (cy + R * Math.sin(endA)).toFixed(2);
+    return `<path class="${cls}" d="M ${cx} ${cy} L ${x1} ${y1} A ${R} ${R} 0 0 1 ${x2} ${y2} Z" />`;
+  }).join('');
+  const innerHalf = `<path class="gauge-inner" d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy} L ${cx} ${cy} Z" />`;
+  const clamped = Math.max(0, Math.min(100, score));
+  const needleA = (180 + (clamped/100) * 180) * Math.PI / 180;
+  const nLen = R - 6;
+  const nx = (cx + nLen * Math.cos(needleA)).toFixed(2);
+  const ny = (cy + nLen * Math.sin(needleA)).toFixed(2);
+  const perpA = needleA + Math.PI / 2;
+  const bw = 3;
+  const bx1 = (cx + bw * Math.cos(perpA)).toFixed(2);
+  const by1 = (cy + bw * Math.sin(perpA)).toFixed(2);
+  const bx2 = (cx - bw * Math.cos(perpA)).toFixed(2);
+  const by2 = (cy - bw * Math.sin(perpA)).toFixed(2);
+  const needle = `<polygon class="gauge-needle" points="${nx},${ny} ${bx1},${by1} ${bx2},${by2}" />`;
+  const hub = `<circle class="gauge-hub" cx="${cx}" cy="${cy}" r="4" />`;
+  return `<svg class="gauge" viewBox="0 0 124 70" xmlns="http://www.w3.org/2000/svg">${paths}${innerHalf}${needle}${hub}</svg>`;
 }
 
 function findLukasContext(dmbDate) {
@@ -932,7 +971,7 @@ function renderShowRow(show) {
   // Date
   const dateEl = document.createElement('div');
   dateEl.className = 'date';
-  dateEl.innerHTML = `<span class="date-num">${dd.num}</span><span class="date-mo">${dd.mo}</span>`;
+  dateEl.innerHTML = `<span class="date-num">${dd.num}</span><span class="date-mo">${dd.mo}</span><span class="date-yr">${dd.yr}</span>`;
 
   // Why-line (pre-outcome reasoning)
   let why = '';
@@ -997,8 +1036,8 @@ function renderShowRow(show) {
     outcomeLine = `<div class="outcome no-sitin">No sit-in</div>`;
   }
   metric.innerHTML = `
+    ${renderGaugeSVG(show.score)}
     ${probLine}
-    <div class="prob-bar-track"><div class="prob-bar" style="width: ${show.score}%;"></div></div>
     ${outcomeLine}
   `;
 
@@ -1027,13 +1066,12 @@ function setTab(name) {
 function init() {
   renderMasterTimeline();
   const list = document.getElementById('shows-list');
-  let upcoming = 0, past = 0;
-  DMB.forEach(s => {
-    list.appendChild(renderShowRow(s));
-    if (status(s.date) === 'past') past++; else upcoming++;
-  });
-  document.getElementById('count-upcoming').textContent = ' · ' + upcoming;
-  document.getElementById('count-past').textContent = ' · ' + past;
+  const upcoming = DMB.filter(s => status(s.date) === 'upcoming');
+  const past     = DMB.filter(s => status(s.date) === 'past').slice().reverse();
+  past.forEach(s => list.appendChild(renderShowRow(s)));
+  upcoming.forEach(s => list.appendChild(renderShowRow(s)));
+  document.getElementById('count-upcoming').textContent = ' · ' + upcoming.length;
+  document.getElementById('count-past').textContent = ' · ' + past.length;
   document.querySelectorAll('.tab').forEach(t => {
     t.addEventListener('click', () => setTab(t.dataset.tab));
   });
