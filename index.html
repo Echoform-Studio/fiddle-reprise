@@ -61,20 +61,25 @@
     margin-bottom: 48px;
   }
   .meta {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 500;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--muted);
-    padding-bottom: 20px;
+    padding-bottom: 22px;
     border-bottom: 1px solid var(--ink);
     display: flex;
-    gap: 28px;
+    align-items: baseline;
+    gap: 36px;
     flex-wrap: wrap;
   }
   .meta b {
     color: var(--ink);
     font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    margin-right: 6px;
+    font-variant-numeric: tabular-nums;
   }
 
   /* ============ Section headers ============ */
@@ -265,11 +270,13 @@
 
   .show[data-status="past"]:not([data-outcome="sitin"]) { opacity: 0.6; }
 
-  /* Banner spans the full row, sits beneath the columns */
+  /* Banner spans the full row, sits beneath the columns. Tight against the
+     row above, generous gap to the next row, so the banner clearly belongs
+     to the show it describes. */
   .row-banner {
     grid-column: 1 / -1;
-    margin: 18px -26px 0;
-    padding: 10px 26px;
+    margin: 4px -26px 24px;
+    padding: 9px 26px;
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.16em;
@@ -305,10 +312,10 @@
     color: var(--muted);
   }
   .date-yr {
-    font-size: 10px;
-    font-weight: 400;
-    letter-spacing: 0.16em;
-    color: var(--muted-2);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--muted);
     display: block;
     margin-top: 4px;
     font-variant-numeric: tabular-nums;
@@ -346,29 +353,34 @@
     color: var(--muted);
     line-height: 1.55;
     letter-spacing: 0.02em;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 16px;
   }
-  .mini-inputs .row { display: contents; }
+  .mini-inputs .row {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    padding: 2px 0;
+  }
   .mini-inputs .k {
+    flex: 0 0 78px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--muted);
   }
   .mini-inputs .v {
+    flex: 1;
     color: var(--ink);
     text-align: right;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Metric */
   .metric { text-align: right; }
   .metric-row {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
+    display: block;
     text-decoration: none;
     color: var(--ink);
     transition: opacity 150ms;
@@ -376,11 +388,12 @@
   .metric-row.linked:hover { opacity: 0.6; }
   .prob-line {
     display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 8px;
   }
   .prob {
-    font-size: 30px;
+    font-size: 32px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.035em;
@@ -388,11 +401,10 @@
   }
   .arrow { font-size: 14px; line-height: 1; }
   .gauge {
-    display: inline-block;
-    vertical-align: middle;
-    width: 84px;
-    height: 48px;
-    margin: 0;
+    display: block;
+    width: 96px;
+    height: 56px;
+    margin: 0 0 6px auto;
   }
   .gauge-seg-very-low  { fill: #DC3838; }
   .gauge-seg-low       { fill: #E68476; }
@@ -869,32 +881,28 @@ function renderMasterTimeline() {
   todayLbl.textContent = 'TODAY';
   svg.appendChild(todayLbl);
 
-  // DMB ticks
+  // DMB ticks — full opacity so legend colors stay true
   DMB.forEach(s => {
     const x = masterX(s.date, W);
     const t = tier(s);
     let color = '#0A0A0A';
     if (t === 'high') color = '#1E7A3E';
     else if (t === 'low') color = '#C44438';
-    const isPast = status(s.date) === 'past';
-    const opacity = isPast ? (s.outcome === 'sitin' ? 1 : 0.5) : 1;
     svg.appendChild(make('line', {
       x1: x, y1: yDMB - tickH/2, x2: x, y2: yDMB + tickH/2,
-      stroke: color, 'stroke-width': 2.5, opacity
+      stroke: color, 'stroke-width': 2.5
     }));
-    // Add a small mark above DMB sit-ins
     if (s.outcome === 'sitin') {
       svg.appendChild(make('circle', { cx: x, cy: yDMB - tickH/2 - 6, r: 2.5, fill: '#1E7A3E' }));
     }
   });
 
-  // Lukas ticks
+  // Jake ticks — full opacity
   JAKE.forEach(l => {
     const x = masterX(l.date, W);
-    const opacity = d(l.date) < TODAY ? 0.5 : 1;
     svg.appendChild(make('line', {
       x1: x, y1: yLUK - tickH/2, x2: x, y2: yLUK + tickH/2,
-      stroke: '#555', 'stroke-width': 2, opacity
+      stroke: '#555', 'stroke-width': 2
     }));
   });
 
