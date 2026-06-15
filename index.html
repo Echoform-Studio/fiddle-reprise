@@ -61,25 +61,20 @@
     margin-bottom: 48px;
   }
   .meta {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--muted);
-    padding-bottom: 22px;
+    padding-bottom: 20px;
     border-bottom: 1px solid var(--ink);
     display: flex;
-    align-items: baseline;
-    gap: 36px;
+    gap: 28px;
     flex-wrap: wrap;
   }
   .meta b {
     color: var(--ink);
     font-weight: 500;
-    font-size: 22px;
-    letter-spacing: -0.01em;
-    margin-right: 6px;
-    font-variant-numeric: tabular-nums;
   }
 
   /* ============ Section headers ============ */
@@ -273,24 +268,44 @@
 
   .show[data-status="past"]:not([data-outcome="sitin"]) { opacity: 0.6; }
 
-  /* Banner spans the full row and sits AT THE TOP, right under the row's
-     border. It reads as the row's header, clearly owning the show below. */
-  .row-banner {
-    grid-column: 1 / -1;
-    margin: -22px -26px 20px;
-    padding: 10px 26px;
+  /* Material-style chip used in the venue column for past outcomes */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 8px;
+    border-radius: 999px;
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    margin-bottom: 8px;
   }
-  .row-banner.sitin {
+  .chip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .chip.sitin {
+    background: #DCEFE2;
+    color: #1E7A3E;
+  }
+  .chip.sitin .chip-icon {
     background: #1E7A3E;
     color: #FFFFFF;
   }
-  .row-banner.no-sitin {
-    background: #EFEFEF;
+  .chip.no-sitin {
+    background: #ECECEC;
     color: var(--muted);
+  }
+  .chip.no-sitin .chip-icon {
+    background: #C8C8C8;
+    color: #FFFFFF;
   }
 
   /* Date */
@@ -1025,7 +1040,18 @@ function renderShowRow(show) {
 
   const venue = document.createElement('div');
   venue.className = 'venue';
+  // Material-style chip for past outcomes, placed above the venue name
+  let chipHTML = '';
+  if (show.outcome === 'sitin') {
+    const parts = [show.sitinPlayer];
+    if (show.sitinSongs) parts.push(`${show.sitinSongs} songs`);
+    chipHTML = `<div class="chip sitin"><span class="chip-icon">✓</span>${parts.join(' · ')}</div>`;
+  } else if (show.outcome === 'no-sitin') {
+    chipHTML = `<div class="chip no-sitin"><span class="chip-icon">–</span>No sit-in</div>`;
+  }
+
   venue.innerHTML = `
+    ${chipHTML}
     <div class="venue-name">${show.venue}</div>
     <div class="venue-city">${show.city}</div>
     <div class="why">${why}</div>
@@ -1067,22 +1093,6 @@ function renderShowRow(show) {
     metric.innerHTML = `<a class="metric-row linked" href="${show.ticket}" target="_blank" rel="noopener">${metricInner}</a>`;
   } else {
     metric.innerHTML = `<span class="metric-row">${metricInner}</span>`;
-  }
-
-  // Full-width banner at the TOP of the row (so it reads as the row's header)
-  if (show.outcome === 'sitin') {
-    const parts = [`Sit-in confirmed · ${show.sitinPlayer}`];
-    if (show.sitinSongs) parts.push(`${show.sitinSongs} songs`);
-    if (show.sitinNote) parts.push(show.sitinNote);
-    const banner = document.createElement('div');
-    banner.className = 'row-banner sitin';
-    banner.textContent = parts.join(' · ');
-    row.appendChild(banner);
-  } else if (show.outcome === 'no-sitin') {
-    const banner = document.createElement('div');
-    banner.className = 'row-banner no-sitin';
-    banner.textContent = 'Played · no sit-in';
-    row.appendChild(banner);
   }
 
   row.appendChild(dateEl);
