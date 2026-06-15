@@ -1128,9 +1128,21 @@ function init() {
   document.getElementById('count-upcoming').textContent = ' · ' + upcoming.length;
   document.getElementById('count-past').textContent = ' · ' + past.length;
   document.querySelectorAll('.tab').forEach(t => {
-    t.addEventListener('click', () => setTab(t.dataset.tab));
+    t.addEventListener('click', () => {
+      setTab(t.dataset.tab);
+      history.replaceState(null, '', '#' + t.dataset.tab);
+    });
   });
-  setTab('upcoming');
+
+  // Honor URL fragment on load: #past opens with the Past tab selected
+  const fromHash = (location.hash || '').replace('#', '');
+  setTab(fromHash === 'past' ? 'past' : 'upcoming');
+
+  // Update on back/forward
+  window.addEventListener('hashchange', () => {
+    const t = (location.hash || '').replace('#', '');
+    if (t === 'past' || t === 'upcoming') setTab(t);
+  });
 }
 
 window.addEventListener('DOMContentLoaded', init);
