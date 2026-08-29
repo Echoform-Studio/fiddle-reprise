@@ -28,6 +28,9 @@ jobs:
         run: node scripts/refresh.mjs
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Tour-date discovery runs once a day, not twice — dates are announced
+          # in batches, and a second daily sweep is pure cost.
+          DISCOVER: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '0 17 * * *' }}
 
       - name: Commit if changed
         run: |
@@ -38,8 +41,8 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
-          if [ "${OUTCOMES_WRITTEN:-0}" -gt 0 ]; then
-            git commit -m "Daily refresh: score $OUTCOMES_WRITTEN show(s), bump updated date"
+          if [ "${DATA_CHANGES:-0}" -gt 0 ]; then
+            git commit -m "Daily refresh: $DATA_CHANGES data change(s)"
           else
             git commit -m "Daily refresh: bump updated date"
           fi
