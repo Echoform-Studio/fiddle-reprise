@@ -37,7 +37,7 @@ const LOOKBACK_DAYS = 90;
 // most ticketing sites do), and the API 400s on the whole request if one slips
 // in — so keep this list to sources known to be fetchable.
 const SOURCES = ['davematthewsband.com', 'dmbalmanac.com', 'antsmarching.org', 'setlist.fm', 'jambase.com'];
-const TOUR_SOURCES = ['davematthewsband.com', 'lukasnelson.com', 'jambase.com', 'songkick.com'];
+const TOUR_SOURCES = ['davematthewsband.com', 'dmbalmanac.com', 'lukasnelson.com', 'jambase.com', 'songkick.com'];
 
 // ── dates ────────────────────────────────────────────────────────────────────
 
@@ -260,7 +260,10 @@ function discoverPrompt(dmbDates, jakeDates, today, since) {
 
 Find tour dates that have been ANNOUNCED BUT ARE NOT YET IN THE LISTS BELOW, for two artists:
 
-1. Dave Matthews Band — check davematthewsband.com/tour first, then jambase/songkick/ticketmaster to confirm.
+1. Dave Matthews Band — TWO pages, and you must check both:
+   - davematthewsband.com/tour lists UPCOMING dates.
+   - davematthewsband.com/setlists/ lists shows ALREADY PLAYED, which the tour page drops once they pass. This is the only place a played-but-unlisted show (a weather makeup, a rescheduled night) will show up, so walk it for every date in the window and compare against the tracked list below.
+   Then use jambase/songkick to confirm.
 2. Lukas Nelson — check lukasnelson.com. Jake Simpson plays fiddle in Lukas's band, so Lukas's calendar is how we infer Jake's availability. This matters as much as the DMB list.
 
 Report any date from ${since} onward — INCLUDING shows that have already been played. A show that happened but is missing from the list below still matters: rescheduled and makeup dates are exactly what goes missing, and we need them. Do not report any date already listed. Do not invent dates: if the tour page shows nothing new, return empty arrays. That is a perfectly good answer.
