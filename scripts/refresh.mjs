@@ -158,6 +158,7 @@ Rules that matter more than completeness:
 - Search for EACH DATE INDIVIDUALLY. A tour index or date-list page is not evidence about a specific night — open the setlist page for that exact date. Budget at least two searches per show before concluding anything.
 - Confidence "high" ONLY when you found the actual setlist for that specific date and can see whether a fiddle guest appeared. A setlist that lists songs and shows no guest musician is a legitimate high-confidence "no sit-in" — that is the expected answer for most shows, and reporting it is the job, not a failure.
 - Report "low" or "medium" only when you genuinely could not retrieve that date's setlist, the show did not happen, or sources disagree. Do not use low confidence as a shortcut past searching.
+- Do not hedge a negative purely because a crowd-sourced setlist might be incomplete. If you retrieved that date's setlist and it shows no fiddle guest, that is "high"; reserve "medium" for when you actually have a reason to doubt the specific page you read.
 - "songs" is the number of songs the guest played, or null if unknown. "note" is a short detail (song names, festival context), or null.
 - "source" is the URL you actually relied on.
 
@@ -209,7 +210,15 @@ async function scorePass(lines, dmb, today) {
   let wrote = 0;
   for (const show of batch) {
     const f = byDate.get(show.date);
-    if (!f || f.confidence !== 'high') {
+    // Asymmetric bar. Inventing a sit-in that never happened corrupts the
+    // record; missing one loses a data point we can still recover later. So a
+    // NEGATIVE is accepted at medium confidence provided the source is specific
+    // to that date, while sit-ins and cancellations still require high.
+    const dateSpecific = f && (/\/setlist\//.test(f.source) || f.source.includes(f.date));
+    const ok = f && (f.confidence === 'high' ||
+      (f.confidence === 'medium' && f.happened && !f.sitin && dateSpecific));
+
+    if (!ok) {
       const why = f ? `${f.confidence} confidence; best guess ${f.sitin ? `sit-in (${f.player})` : 'no sit-in'} (${f.source})` : 'no entry returned';
       lines[show.index] = markAttempt(show.line, show.tries);
       const retired = show.tries + 1 >= MAX_TRIES;
@@ -218,7 +227,8 @@ async function scorePass(lines, dmb, today) {
       continue;
     }
     lines[show.index] = applyOutcome(show.line, f);
-    console.log(`  ${show.date}  ${!f.happened ? 'DID NOT HAPPEN' : f.sitin ? `SIT-IN — ${f.player}` : 'no sit-in'} (${f.source})`);
+    const how = f.confidence === 'high' ? '' : ` [${f.confidence} conf, date-specific source]`;
+    console.log(`  ${show.date}  ${!f.happened ? 'DID NOT HAPPEN' : f.sitin ? `SIT-IN — ${f.player}` : 'no sit-in'}${how} (${f.source})`);
     wrote++;
   }
   return wrote;
