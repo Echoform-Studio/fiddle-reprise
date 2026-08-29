@@ -24,8 +24,11 @@ const FILE = 'index.html';
 const MAX_SCORE_PER_RUN = 6;
 const MAX_NEW_SHOWS = 12;
 
-const SOURCES = ['setlist.fm', 'antsmarching.org', 'dmbalmanac.com', 'jambase.com', 'reddit.com'];
-const TOUR_SOURCES = ['davematthewsband.com', 'lukasnelson.com', 'jambase.com', 'ticketmaster.com', 'songkick.com'];
+// allowed_domains rejects any host that blocks Anthropic's crawler (reddit and
+// most ticketing sites do), and the API 400s on the whole request if one slips
+// in — so keep this list to sources known to be fetchable.
+const SOURCES = ['setlist.fm', 'antsmarching.org', 'dmbalmanac.com', 'jambase.com'];
+const TOUR_SOURCES = ['davematthewsband.com', 'lukasnelson.com', 'jambase.com', 'songkick.com'];
 
 // ── dates ────────────────────────────────────────────────────────────────────
 
