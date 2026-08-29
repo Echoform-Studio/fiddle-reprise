@@ -27,6 +27,11 @@ const MAX_NEW_SHOWS = 12;
 // postponed show with no setlist is retried every run forever, occupying a
 // batch slot and costing money while never resolving.
 const MAX_TRIES = 3;
+// Discovery also looks back this far. A show played but never listed — a
+// weather makeup date, or anything announced while the job was broken — is
+// otherwise invisible forever, since the scoring pass only ever revisits rows
+// that already exist.
+const LOOKBACK_DAYS = 90;
 
 // allowed_domains rejects any host that blocks Anthropic's crawler (reddit and
 // most ticketing sites do), and the API 400s on the whole request if one slips
@@ -250,7 +255,7 @@ const Discovered = z.object({
   })),
 });
 
-function discoverPrompt(dmbDates, jakeDates, today) {
+function discoverPrompt(dmbDates, jakeDates, today, since) {
   return `Today is ${today}. You are maintaining a tracker that forecasts fiddle sit-ins at Dave Matthews Band shows.
 
 Find tour dates that have been ANNOUNCED BUT ARE NOT YET IN THE LISTS BELOW, for two artists:
@@ -258,7 +263,7 @@ Find tour dates that have been ANNOUNCED BUT ARE NOT YET IN THE LISTS BELOW, for
 1. Dave Matthews Band — check davematthewsband.com/tour first, then jambase/songkick/ticketmaster to confirm.
 2. Lukas Nelson — check lukasnelson.com. Jake Simpson plays fiddle in Lukas's band, so Lukas's calendar is how we infer Jake's availability. This matters as much as the DMB list.
 
-Only report dates on or after ${today}. Do not report any date already listed. Do not invent dates: if the tour page shows nothing new, return empty arrays. That is a perfectly good answer.
+Report any date from ${since} onward — INCLUDING shows that have already been played. A show that happened but is missing from the list below still matters: rescheduled and makeup dates are exactly what goes missing, and we need them. Do not report any date already listed. Do not invent dates: if the tour page shows nothing new, return empty arrays. That is a perfectly good answer.
 
 For each NEW DMB date, assign a "score" from 0-100 using this rubric, and explain it in "rationale":
 - Every show starts at a baseline of 18.
@@ -300,11 +305,14 @@ function insertSorted(lines, arr, newItems, render) {
 }
 
 async function discoverPass(lines, dmb, jake, today) {
+  const since = new Date(Date.parse(today + 'T00:00:00Z') - LOOKBACK_DAYS * 864e5)
+    .toISOString().slice(0, 10);
   const found = await ask({
     prompt: discoverPrompt(
       dmb.entries.map(e => e.date),
       jake.entries.map(e => e.date),
       today,
+      since,
     ),
     schema: Discovered, schemaName: 'discovered',
     domains: TOUR_SOURCES, maxUses: 20,
@@ -315,14 +323,14 @@ async function discoverPass(lines, dmb, jake, today) {
 
   const newDmb = found.dmb.filter(s => {
     if (s.confidence !== 'high') { console.log(`  DMB ${s.date} SKIP — ${s.confidence} confidence (${s.source})`); return false; }
-    if (s.date < today) return false;
+    if (s.date < since) return false;
     if (known.has(s.date + '|' + s.venue)) return false;
     return true;
   }).slice(0, MAX_NEW_SHOWS);
 
   const newJake = found.jake.filter(s => {
     if (s.confidence !== 'high') return false;
-    return s.date >= today && !knownJake.has(s.date);
+    return s.date >= since && !knownJake.has(s.date);
   }).slice(0, MAX_NEW_SHOWS * 2);
 
   for (const s of newDmb) console.log(`  + DMB  ${s.date}  ${s.venue}, ${s.city} — score ${s.score} (${s.rationale})`);
