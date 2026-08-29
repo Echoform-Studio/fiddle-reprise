@@ -16,6 +16,10 @@ import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 
 const FILE = 'index.html';
 
+// Hard ceiling on how many shows one run will research. A backlog spills over
+// into later runs rather than letting a single run compound context unbounded.
+const MAX_PER_RUN = 6;
+
 // ── dates ────────────────────────────────────────────────────────────────────
 
 // The site pins "today" to Pacific; match it so the two never disagree.
@@ -101,26 +105,44 @@ async function research(pending) {
     max_tokens: 32000,
     thinking: { type: 'adaptive' },
     output_config: {
-      effort: 'high',
+      // Setlist lookup is retrieval, not hard reasoning; medium is plenty and
+      // materially cheaper. The high-confidence gate below is what guards accuracy.
+      effort: 'medium',
       format: zodOutputFormat(Findings, 'findings'),
     },
     tools: [{
-      type: 'web_search_20260209',
+      // 20260318 + response_inclusion:'excluded' keeps raw search blocks out of
+      // the response we're billed for; we only need the final JSON.
+      type: 'web_search_20260318',
       name: 'web_search',
-      max_uses: Math.min(60, pending.length * 3 + 10),
+      response_inclusion: 'excluded',
+      max_uses: Math.min(24, pending.length * 3 + 3),
+      allowed_domains: ['setlist.fm', 'antsmarching.org', 'dmbalmanac.com', 'jambase.com', 'reddit.com'],
     }],
     messages: [{ role: 'user', content: PROMPT_HEADER + list }],
   };
 
   // Server tools can hand back `pause_turn` on long research runs; resume until done.
   const messages = [...params.messages];
+  const spend = { input: 0, output: 0, searches: 0 };
   let final;
   for (let turn = 0; turn < 6; turn++) {
     const stream = client.messages.stream({ ...params, messages });
     final = await stream.finalMessage();
+    const u = final.usage ?? {};
+    spend.input   += (u.input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0);
+    spend.output  += u.output_tokens ?? 0;
+    spend.searches += u.server_tool_use?.web_search_requests ?? 0;
     if (final.stop_reason !== 'pause_turn') break;
     messages.push({ role: 'assistant', content: final.content });
   }
+
+  // Opus 5: $5/M in, $25/M out. Web search: $10/1000.
+  const cost = (spend.input / 1e6) * 5 + (spend.output / 1e6) * 25 + spend.searches * 0.01;
+  console.log(
+    `Spend: ${spend.input.toLocaleString()} in + ${spend.output.toLocaleString()} out tokens, ` +
+    `${spend.searches} searches \u2248 $${cost.toFixed(3)}`
+  );
 
   if (final.stop_reason === 'refusal') {
     throw new Error(`Model declined the request: ${final.stop_details?.explanation ?? 'no explanation'}`);
@@ -161,9 +183,13 @@ function applyOutcome(line, f) {
 const today = todayPacific();
 let html = readFileSync(FILE, 'utf8');
 const shows = parseShows(html);
-const pending = shows.filter(s => !s.scored && s.date < today);
+const backlog = shows.filter(s => !s.scored && s.date < today);
+const pending = backlog.slice(0, MAX_PER_RUN);
 
-console.log(`Today (Pacific): ${today}. ${shows.length} shows tracked, ${pending.length} awaiting an outcome.`);
+console.log(`Today (Pacific): ${today}. ${shows.length} shows tracked, ${backlog.length} awaiting an outcome.`);
+if (backlog.length > pending.length) {
+  console.log(`Researching the oldest ${pending.length}; ${backlog.length - pending.length} will carry to the next run.`);
+}
 
 let wrote = 0;
 if (pending.length) {
