@@ -92,9 +92,10 @@ async function ask({ prompt, schema, schemaName, domains, maxUses }) {
     max_tokens: 32000,
     thinking: { type: 'adaptive' },
     output_config: {
-      // Retrieval, not hard reasoning. The high-confidence gate below is what
-      // actually guards accuracy, so medium effort is the right trade.
-      effort: 'medium',
+      // Do not lower this. At medium the model does ~2 searches for 6 shows and
+      // takes the "skip if unsure" exit instead of looking; setlists that plainly
+      // exist come back low-confidence. The saving is not worth the useless run.
+      effort: 'high',
       format: zodOutputFormat(schema, schemaName),
     },
     tools: [{
@@ -152,8 +153,9 @@ const SCORE_PROMPT = `You are checking Dave Matthews Band setlists to determine 
 Tracked fiddlers: Jake Simpson (Lukas Nelson's band, the most frequent guest), Casey Driessen, Tatiana Hargreaves, Jason Crosby. A sit-in by any other fiddle/violin player counts too — record their name.
 
 Rules that matter more than completeness:
-- Confidence "high" ONLY when you found the actual setlist for that specific date and can see whether a fiddle guest appeared. A setlist showing no guest is a legitimate high-confidence "no sit-in".
-- If you cannot find the setlist, if the show appears not to have happened, or if sources disagree, report "low" or "medium" and we will skip it. Guessing is worse than skipping.
+- Search for EACH DATE INDIVIDUALLY. A tour index or date-list page is not evidence about a specific night — open the setlist page for that exact date. Budget at least two searches per show before concluding anything.
+- Confidence "high" ONLY when you found the actual setlist for that specific date and can see whether a fiddle guest appeared. A setlist that lists songs and shows no guest musician is a legitimate high-confidence "no sit-in" — that is the expected answer for most shows, and reporting it is the job, not a failure.
+- Report "low" or "medium" only when you genuinely could not retrieve that date's setlist, the show did not happen, or sources disagree. Do not use low confidence as a shortcut past searching.
 - "songs" is the number of songs the guest played, or null if unknown. "note" is a short detail (song names, festival context), or null.
 - "source" is the URL you actually relied on.
 
