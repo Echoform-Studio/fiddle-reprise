@@ -31,7 +31,7 @@ const MAX_TRIES = 3;
 // allowed_domains rejects any host that blocks Anthropic's crawler (reddit and
 // most ticketing sites do), and the API 400s on the whole request if one slips
 // in — so keep this list to sources known to be fetchable.
-const SOURCES = ['setlist.fm', 'antsmarching.org', 'dmbalmanac.com', 'jambase.com'];
+const SOURCES = ['davematthewsband.com', 'dmbalmanac.com', 'antsmarching.org', 'setlist.fm', 'jambase.com'];
 const TOUR_SOURCES = ['davematthewsband.com', 'lukasnelson.com', 'jambase.com', 'songkick.com'];
 
 // ── dates ────────────────────────────────────────────────────────────────────
@@ -153,12 +153,16 @@ const SCORE_PROMPT = `You are checking Dave Matthews Band setlists to determine 
 
 Tracked fiddlers: Jake Simpson (Lukas Nelson's band, the most frequent guest), Casey Driessen, Tatiana Hargreaves, Jason Crosby. A sit-in by any other fiddle/violin player counts too — record their name.
 
+PRIMARY SOURCE: davematthewsband.com/setlists/ is the band's own setlist archive. It lists every show by date and marks guest musicians with footnote notation (e.g. "* Jake Simpson" against the songs they played). Check it first and treat it as authoritative. dmbalmanac.com is a thorough second opinion; antsmarching.org, setlist.fm and jambase are corroboration only.
+
+Because the official archive marks guests affirmatively, a show listed there with no fiddle/violin guest footnote is a confident "no sit-in" — not an incomplete record. Do not hedge on that.
+
 Rules that matter more than completeness:
 - "happened" is false if the show was postponed, cancelled, or rescheduled to another date. A postponed show is NOT a "no sit-in" — it is not a data point at all. Set happened:false, sitin:false, and give the confidence you have in the postponement itself.
 - Search for EACH DATE INDIVIDUALLY. A tour index or date-list page is not evidence about a specific night — open the setlist page for that exact date. Budget at least two searches per show before concluding anything.
 - Confidence "high" ONLY when you found the actual setlist for that specific date and can see whether a fiddle guest appeared. A setlist that lists songs and shows no guest musician is a legitimate high-confidence "no sit-in" — that is the expected answer for most shows, and reporting it is the job, not a failure.
 - Report "low" or "medium" only when you genuinely could not retrieve that date's setlist, the show did not happen, or sources disagree. Do not use low confidence as a shortcut past searching.
-- Do not hedge a negative purely because a crowd-sourced setlist might be incomplete. If you retrieved that date's setlist and it shows no fiddle guest, that is "high"; reserve "medium" for when you actually have a reason to doubt the specific page you read.
+- Reserve "medium"/"low" for when you could not reach that date on the official archive and the other sources conflict — not for ordinary doubt about crowd-sourced completeness.
 - "songs" is the number of songs the guest played, or null if unknown. "note" is a short detail (song names, festival context), or null.
 - "source" is the URL you actually relied on.
 
@@ -210,15 +214,7 @@ async function scorePass(lines, dmb, today) {
   let wrote = 0;
   for (const show of batch) {
     const f = byDate.get(show.date);
-    // Asymmetric bar. Inventing a sit-in that never happened corrupts the
-    // record; missing one loses a data point we can still recover later. So a
-    // NEGATIVE is accepted at medium confidence provided the source is specific
-    // to that date, while sit-ins and cancellations still require high.
-    const dateSpecific = f && (/\/setlist\//.test(f.source) || f.source.includes(f.date));
-    const ok = f && (f.confidence === 'high' ||
-      (f.confidence === 'medium' && f.happened && !f.sitin && dateSpecific));
-
-    if (!ok) {
+    if (!f || f.confidence !== 'high') {
       const why = f ? `${f.confidence} confidence; best guess ${f.sitin ? `sit-in (${f.player})` : 'no sit-in'} (${f.source})` : 'no entry returned';
       lines[show.index] = markAttempt(show.line, show.tries);
       const retired = show.tries + 1 >= MAX_TRIES;
@@ -227,8 +223,7 @@ async function scorePass(lines, dmb, today) {
       continue;
     }
     lines[show.index] = applyOutcome(show.line, f);
-    const how = f.confidence === 'high' ? '' : ` [${f.confidence} conf, date-specific source]`;
-    console.log(`  ${show.date}  ${!f.happened ? 'DID NOT HAPPEN' : f.sitin ? `SIT-IN — ${f.player}` : 'no sit-in'}${how} (${f.source})`);
+    console.log(`  ${show.date}  ${!f.happened ? 'DID NOT HAPPEN' : f.sitin ? `SIT-IN — ${f.player}` : 'no sit-in'} (${f.source})`);
     wrote++;
   }
   return wrote;
