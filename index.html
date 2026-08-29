@@ -307,6 +307,16 @@
     background: #C8C8C8;
     color: #FFFFFF;
   }
+  .chip.cancelled {
+    background: #F4F4F4;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .chip.cancelled .chip-icon {
+    background: #B0B0B0;
+    color: #FFFFFF;
+    font-style: normal;
+  }
 
   /* Date */
   .date { font-feature-settings: 'tnum' 1; }
@@ -658,7 +668,7 @@ const DMB = [
   { date:'2026-06-12', venue:'Xfinity Center',                      city:'Mansfield, MA',       score:48, outcome:'no-sitin' },
   { date:'2026-06-13', venue:'Jiffy Lube Live',                     city:'Bristow, VA',         score:48, outcome:'no-sitin' },
   // Upcoming
-  { date:'2026-06-23', venue:'Mystic Lake Amphitheater',            city:'Shakopee, MN',        score:48, outcome:'no-sitin' },
+  { date:'2026-06-23', venue:'Mystic Lake Amphitheater',            city:'Shakopee, MN',        score:48, cancelled:true },
   { date:'2026-06-24', venue:'Morton Amphitheater',                 city:'Kansas City, MO',     score:46, outcome:'sitin', sitinPlayer:'Jake Simpson', sitinSongs:5, sitinNote:'Jake Simpson (fiddle, Lukas Nelson\'s band / Lil Smokies) sat in on his 4th appearance of the summer: #41, Warehouse, Big Eyed Fish, Bartender (last four of main set) and Tripping Billies (final song).' },
   { date:'2026-06-26', venue:'Ruoff Music Center',                  city:'Noblesville, IN',     score:10, outcome:'no-sitin' },
   { date:'2026-06-27', venue:'Ruoff Music Center',                  city:'Noblesville, IN',     score:38, outcome:'no-sitin' },
@@ -1066,6 +1076,8 @@ function renderShowRow(show) {
     chipHTML = `<div class="chip sitin"><span class="chip-icon">✓</span>${parts.join(' · ')}</div>`;
   } else if (show.outcome === 'no-sitin') {
     chipHTML = `<div class="chip no-sitin"><span class="chip-icon">–</span>No sit-in</div>`;
+  } else if (show.cancelled) {
+    chipHTML = `<div class="chip cancelled"><span class="chip-icon">×</span>Did not take place</div>`;
   }
 
   venue.innerHTML = `
@@ -1142,7 +1154,7 @@ function setTab(name) {
 // count on both sides — including unresolved ones would inflate the
 // expectation with no actual to weigh it against.
 function renderCalibration() {
-  const settled = DMB.filter(s => status(s.date) === 'past' && s.outcome);
+  const settled = DMB.filter(s => status(s.date) === 'past' && s.outcome && !s.cancelled);
   const expected = settled.reduce((a, s) => a + (s.score || 0), 0) / 100;
   const actual = settled.filter(s => s.outcome === 'sitin').length;
 
@@ -1163,7 +1175,7 @@ function renderCalibration() {
 }
 
 function renderCalibrationLine() {
-  const played = DMB.filter(s => s.date.startsWith('2026') && status(s.date) === 'past');
+  const played = DMB.filter(s => s.date.startsWith('2026') && status(s.date) === 'past' && !s.cancelled);
   const scored = played.filter(s => s.outcome);
   const retired = played.filter(s => s.unresolved && !s.outcome).length;
   const sitins = scored.filter(s => s.outcome === 'sitin');
@@ -1183,7 +1195,7 @@ function init() {
   renderCalibrationLine();
   renderCalibration();
   document.getElementById('stat-shows').textContent  = DMB.length;
-  document.getElementById('stat-played').textContent = DMB.filter(x => status(x.date) === 'past').length;
+  document.getElementById('stat-played').textContent = DMB.filter(x => status(x.date) === 'past' && !x.cancelled).length;
   document.getElementById('stat-sitins').textContent = DMB.filter(x => x.outcome === 'sitin').length;
   renderMasterTimeline();
   const list = document.getElementById('shows-list');

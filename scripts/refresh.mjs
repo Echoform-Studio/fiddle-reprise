@@ -70,7 +70,7 @@ function readArray(lines, decl) {
       line: lines[i],
       venue: (lines[i].match(/venue:\s*(['"])(.*?)\1/) || [])[2] || '',
       city:  (lines[i].match(/city:\s*(['"])(.*?)\1/)  || [])[2] || '',
-      done: /\b(outcome|unresolved):/.test(lines[i]),
+      done: /\b(outcome|unresolved|cancelled):/.test(lines[i]),
       tries: Number((lines[i].match(/\btries:(\d+)/) || [])[1] || 0),
     });
   }
@@ -139,6 +139,7 @@ async function ask({ prompt, schema, schemaName, domains, maxUses }) {
 const Findings = z.object({
   shows: z.array(z.object({
     date: z.string(),
+    happened: z.boolean(),
     sitin: z.boolean(),
     player: z.string().nullable(),
     songs: z.number().int().nullable(),
@@ -153,6 +154,7 @@ const SCORE_PROMPT = `You are checking Dave Matthews Band setlists to determine 
 Tracked fiddlers: Jake Simpson (Lukas Nelson's band, the most frequent guest), Casey Driessen, Tatiana Hargreaves, Jason Crosby. A sit-in by any other fiddle/violin player counts too — record their name.
 
 Rules that matter more than completeness:
+- "happened" is false if the show was postponed, cancelled, or rescheduled to another date. A postponed show is NOT a "no sit-in" — it is not a data point at all. Set happened:false, sitin:false, and give the confidence you have in the postponement itself.
 - Search for EACH DATE INDIVIDUALLY. A tour index or date-list page is not evidence about a specific night — open the setlist page for that exact date. Budget at least two searches per show before concluding anything.
 - Confidence "high" ONLY when you found the actual setlist for that specific date and can see whether a fiddle guest appeared. A setlist that lists songs and shows no guest musician is a legitimate high-confidence "no sit-in" — that is the expected answer for most shows, and reporting it is the job, not a failure.
 - Report "low" or "medium" only when you genuinely could not retrieve that date's setlist, the show did not happen, or sources disagree. Do not use low confidence as a shortcut past searching.
@@ -165,6 +167,7 @@ Shows to check:
 `;
 
 function outcomeFields(f) {
+  if (!f.happened) return `, cancelled:true`;
   if (!f.sitin) return `, outcome:'no-sitin'`;
   let out = `, outcome:'sitin'`;
   if (f.player) out += `, sitinPlayer:'${esc(f.player)}'`;
@@ -215,7 +218,7 @@ async function scorePass(lines, dmb, today) {
       continue;
     }
     lines[show.index] = applyOutcome(show.line, f);
-    console.log(`  ${show.date}  ${f.sitin ? `SIT-IN — ${f.player}` : 'no sit-in'} (${f.source})`);
+    console.log(`  ${show.date}  ${!f.happened ? 'DID NOT HAPPEN' : f.sitin ? `SIT-IN — ${f.player}` : 'no sit-in'} (${f.source})`);
     wrote++;
   }
   return wrote;
