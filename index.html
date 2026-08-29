@@ -530,15 +530,15 @@
       <div class="callout-stats">
         <div>
           <span class="callout-label">Model expected</span>
-          <span class="callout-num">18<span class="unit">&thinsp;sit-ins</span></span>
+          <span class="callout-num" id="stat-expected">—<span class="unit">&thinsp;sit-ins</span></span>
         </div>
         <div>
           <span class="callout-label">Actual</span>
-          <span class="callout-num actual">13<span class="unit">&thinsp;sit-ins</span></span>
+          <span class="callout-num actual" id="stat-actual">—<span class="unit">&thinsp;sit-ins</span></span>
         </div>
       </div>
       <div class="callout-body">
-        Across the 54 played shows since spring 2025, the model expected ~18 fiddle sit-ins. Thirteen occurred. The model casts a slightly wider net than reality (better to surface a possible sit-in than miss one). The page tracks both numbers as the tour progresses.
+        <span id="calibration-body"></span>
       </div>
     </div>
 
@@ -1137,6 +1137,31 @@ function setTab(name) {
 }
 
 // Calibration stats, derived so they can't drift from the data above.
+// Model calibration: expected sit-ins are the sum of the scores we assigned,
+// compared against what actually happened. Only shows with a settled outcome
+// count on both sides — including unresolved ones would inflate the
+// expectation with no actual to weigh it against.
+function renderCalibration() {
+  const settled = DMB.filter(s => status(s.date) === 'past' && s.outcome);
+  const expected = settled.reduce((a, s) => a + (s.score || 0), 0) / 100;
+  const actual = settled.filter(s => s.outcome === 'sitin').length;
+
+  document.getElementById('stat-expected').firstChild.nodeValue = Math.round(expected);
+  document.getElementById('stat-actual').firstChild.nodeValue = actual;
+
+  let verdict;
+  if (expected > actual * 1.1) {
+    verdict = 'The model casts a slightly wider net than reality (better to surface a possible sit-in than miss one).';
+  } else if (actual > expected * 1.1) {
+    verdict = 'Sit-ins are outpacing the forecast \u2014 the model is running conservative.';
+  } else {
+    verdict = 'The model is tracking close to reality.';
+  }
+  document.getElementById('calibration-body').textContent =
+    `Across the ${settled.length} settled shows since spring 2025, the model expected ~${Math.round(expected)} fiddle sit-ins. ` +
+    `${actual} occurred. ${verdict} The page tracks both numbers as the tour progresses.`;
+}
+
 function renderCalibrationLine() {
   const played = DMB.filter(s => s.date.startsWith('2026') && status(s.date) === 'past');
   const scored = played.filter(s => s.outcome);
@@ -1156,6 +1181,7 @@ function init() {
   const td = fmtDay(TODAY_STR);
   document.getElementById('legend-today').textContent = td.num + ' ' + td.mo.toUpperCase();
   renderCalibrationLine();
+  renderCalibration();
   document.getElementById('stat-shows').textContent  = DMB.length;
   document.getElementById('stat-played').textContent = DMB.filter(x => status(x.date) === 'past').length;
   document.getElementById('stat-sitins').textContent = DMB.filter(x => x.outcome === 'sitin').length;
