@@ -23,6 +23,10 @@ const FILE = 'index.html';
 // rather than letting a single run compound context — and cost — unbounded.
 const MAX_SCORE_PER_RUN = 6;
 const MAX_NEW_SHOWS = 12;
+// Give up on a show after this many inconclusive attempts. Without it, a
+// postponed show with no setlist is retried every run forever, occupying a
+// batch slot and costing money while never resolving.
+const MAX_TRIES = 3;
 
 // allowed_domains rejects any host that blocks Anthropic's crawler (reddit and
 // most ticketing sites do), and the API 400s on the whole request if one slips
@@ -66,7 +70,8 @@ function readArray(lines, decl) {
       line: lines[i],
       venue: (lines[i].match(/venue:\s*(['"])(.*?)\1/) || [])[2] || '',
       city:  (lines[i].match(/city:\s*(['"])(.*?)\1/)  || [])[2] || '',
-      scored: /\boutcome:/.test(lines[i]),
+      done: /\b(outcome|unresolved):/.test(lines[i]),
+      tries: Number((lines[i].match(/\btries:(\d+)/) || [])[1] || 0),
     });
   }
   if (end === -1) throw new Error(`Could not find the end of "${decl}".`);
@@ -166,16 +171,25 @@ function outcomeFields(f) {
   return out;
 }
 
+// Record an inconclusive attempt, or retire the show once we've tried enough.
+function markAttempt(line, tries) {
+  const stripped = line.replace(/,\s*tries:\d+/, '');
+  const m = stripped.match(/^(.*?)(\s*\},?\s*)$/s);
+  if (!m) throw new Error(`Unexpected show line shape: ${line}`);
+  const field = tries + 1 >= MAX_TRIES ? `, unresolved:true` : `, tries:${tries + 1}`;
+  return m[1] + field + m[2];
+}
+
 function applyOutcome(line, f) {
   // An empty ticket link is dead weight once a show has been played.
-  const cleaned = line.replace(/,\s*ticket:''/, '');
+  const cleaned = line.replace(/,\s*ticket:''/, '').replace(/,\s*tries:\d+/, '');
   const m = cleaned.match(/^(.*?)(\s*\},?\s*)$/s);
   if (!m) throw new Error(`Unexpected show line shape: ${line}`);
   return m[1] + outcomeFields(f) + m[2];
 }
 
 async function scorePass(lines, dmb, today) {
-  const backlog = dmb.entries.filter(s => !s.scored && s.date < today);
+  const backlog = dmb.entries.filter(s => !s.done && s.date < today);
   const batch = backlog.slice(0, MAX_SCORE_PER_RUN);
   if (!batch.length) { console.log('SCORE: nothing to score.'); return 0; }
 
@@ -190,9 +204,12 @@ async function scorePass(lines, dmb, today) {
   let wrote = 0;
   for (const show of batch) {
     const f = byDate.get(show.date);
-    if (!f) { console.log(`  ${show.date}  SKIP — no entry returned`); continue; }
-    if (f.confidence !== 'high') {
-      console.log(`  ${show.date}  SKIP — ${f.confidence} confidence; best guess ${f.sitin ? `sit-in (${f.player})` : 'no sit-in'} (${f.source})`);
+    if (!f || f.confidence !== 'high') {
+      const why = f ? `${f.confidence} confidence; best guess ${f.sitin ? `sit-in (${f.player})` : 'no sit-in'} (${f.source})` : 'no entry returned';
+      lines[show.index] = markAttempt(show.line, show.tries);
+      const retired = show.tries + 1 >= MAX_TRIES;
+      console.log(`  ${show.date}  ${retired ? 'GIVING UP' : `SKIP (try ${show.tries + 1}/${MAX_TRIES})`} — ${why}`);
+      wrote++;
       continue;
     }
     lines[show.index] = applyOutcome(show.line, f);
@@ -317,7 +334,7 @@ const jake0 = readArray(lines, 'const JAKE = [');
 
 console.log(`Today (Pacific): ${today}. Tracking ${dmb0.entries.length} DMB shows, ${jake0.entries.length} Jake dates.`);
 
-const needsScoring = dmb0.entries.some(s => !s.scored && s.date < today);
+const needsScoring = dmb0.entries.some(s => !s.done && s.date < today);
 const discover = process.env.DISCOVER === 'true';
 if (!discover) console.log('DISCOVER: skipped (runs once daily).');
 

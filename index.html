@@ -1140,13 +1140,15 @@ function setTab(name) {
 function renderCalibrationLine() {
   const played = DMB.filter(s => s.date.startsWith('2026') && status(s.date) === 'past');
   const scored = played.filter(s => s.outcome);
+  const retired = played.filter(s => s.unresolved && !s.outcome).length;
   const sitins = scored.filter(s => s.outcome === 'sitin');
   const el = document.getElementById('calibration-line');
   if (!scored.length) { el.textContent = 'No 2026 shows have been scored yet.'; return; }
   const pct = Math.round((sitins.length / scored.length) * 100);
   let txt = `Of the ${scored.length} scored 2026 shows, ${sitins.length} have had a fiddle sit-in \u2014 ${pct}%.`;
-  const pending = played.length - scored.length;
+  const pending = played.length - scored.length - retired;
   if (pending > 0) txt += ` ${pending} played show${pending === 1 ? '' : 's'} awaiting an outcome.`;
+  if (retired) txt += ` ${retired} could not be resolved from available setlists.`;
   el.textContent = txt;
 }
 
