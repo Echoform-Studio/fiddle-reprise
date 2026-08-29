@@ -34,9 +34,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          if ! git diff --staged --quiet; then
-            git commit -m "Daily refresh: bump updated date"
-            git push
-          else
+          if git diff --staged --quiet; then
             echo "No changes to commit."
+            exit 0
           fi
+          if [ "${OUTCOMES_WRITTEN:-0}" -gt 0 ]; then
+            git commit -m "Daily refresh: score $OUTCOMES_WRITTEN show(s), bump updated date"
+          else
+            git commit -m "Daily refresh: bump updated date"
+          fi
+          git push
